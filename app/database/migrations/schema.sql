@@ -1,0 +1,42 @@
+-- Users 테이블 생성
+CREATE TABLE Users (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Username VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) NOT NULL UNIQUE,
+    PasswordHash VARCHAR(255) NOT NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Videos 테이블 생성
+CREATE TABLE Videos (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Filename VARCHAR(255) NOT NULL,
+    FilePath VARCHAR(255) NOT NULL,
+    Status ENUM('uploaded', 'processed', 'failed') DEFAULT 'uploaded',
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- VideoJobs 테이블 생성
+CREATE TABLE VideoJobs (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    VideoID INT,
+    JobType ENUM('trim', 'concat') NOT NULL,
+    Parameters JSON NOT NULL,
+    Status ENUM('pending', 'in_progress', 'completed', 'failed') DEFAULT 'pending',
+    ResultFilePath VARCHAR(255),
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (VideoID) REFERENCES Videos(ID) ON DELETE CASCADE
+);
+
+-- UserVideoPermissions 테이블 생성
+CREATE TABLE UserVideoPermissions (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT,
+    VideoID INT,
+    PermissionType ENUM('owner', 'editor', 'viewer') NOT NULL,
+    FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE,
+    FOREIGN KEY (VideoID) REFERENCES Videos(ID) ON DELETE CASCADE
+);
