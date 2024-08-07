@@ -1,5 +1,4 @@
-// TODO: Zap 로그 적용, 리팩토링 (모듈화, 매직 넘버 및 매직 스트링 사용 안 하기, 로그 출력 부분 util 메서드로 빼버릴까...), FFmpeg 라이브러리 Deep Dive 필요
-package infrastructure
+package ffmpeg
 
 import (
 	"fmt"
