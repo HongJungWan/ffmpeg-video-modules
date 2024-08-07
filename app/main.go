@@ -1,8 +1,31 @@
 package main
 
-import "fmt"
+import (
+	"github.com/HongJungWan/ffmpeg-video-modules/app/helper"
+	"github.com/HongJungWan/ffmpeg-video-modules/app/infrastructure/configs"
+	"github.com/HongJungWan/ffmpeg-video-modules/app/infrastructure/logger"
+	"go.uber.org/zap"
+	"os"
+)
 
-// FIXME: 메인 실행 파일
+var (
+	conf = configs.Config{}
+	file string
+)
+
 func main() {
-	fmt.Println("main.go 동작 테스트")
+	if !parseConfig() {
+		helper.ShowHelp()
+		os.Exit(-1)
+	}
+
+	log := logger.ConfigureLogger(conf.Environment)
+	logger.LogCurrentLevel(log)
+
+	db := configs.ConnectionDB(&conf)
+	log.Info("config", zap.Any("config", db))
+
+	logger.LogCurrentConfig(conf)
+
+	startServer()
 }
