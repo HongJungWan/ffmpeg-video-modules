@@ -1,26 +1,27 @@
 version: "3"
 
 services:
-  golang:
-    container_name: "ffmpeg-video-modules"
-    build:
-      context: .
-      dockerfile: ./docker/go/Dockerfile
-    volumes:
-      - ./app:/go/src/github.com/HongJungWan/ffmpeg-video-modules/app
+#  golang:
+#    container_name: "ffmpeg-video-modules"
+#    build:
+#      context: .
+#      dockerfile: ./docker/go/Dockerfile
+#    volumes:
+#      - ./app:/go/src/github.com/HongJungWan/ffmpeg-video-modules/app
+#    ports:
+#      - "8081:8080"
+#    depends_on:
+#      - mariadb
+
+  mariadb:
+    container_name: "mariadb"
+    image: mariadb:latest
     ports:
-      - "8081:8080"
-    depends_on:
-      - mysql
-  mysql:
-    container_name: "mysql"
-    image: mysql:latest
-    ports:
-      - "3307:3306"
+      - "3310:3306"
     volumes:
       - mysql_db:/var/lib/mysql:delegated
     environment:
-      - MYSQL_DATABASE=go_clean_architecture_web_application_boilerplate
+      - MYSQL_DATABASE=ffmpeg-video-database
       - MYSQL_ROOT_PASSWORD=password
 
 volumes:
