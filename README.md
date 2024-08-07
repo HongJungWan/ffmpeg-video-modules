@@ -1,10 +1,23 @@
 # ffmpeg-video-modules
 
----
+### 테스트 코드 실행 시키기
 
-## Method Naming Conventions
+```
+# 📌 Git Bash 기준 명령어
 
-### Controller Method Naming Rules
+
+# 📌 특정 디렉토리의 모든 테스트 코드 실행
+go test ./app/...
+
+
+# 📌 커버리지 프로파일 생성 후, HTML 보고서 생성
+go test -v -coverprofile=coverage.out ./app/...
+go tool cover -html=coverage.out
+```
+
+<br><br>
+
+### 컨트롤러 메서드 명명 규칙
 
 | Controller Method | HTTP Method | Description                           |
 |-------------------|-------------|---------------------------------------|
@@ -16,7 +29,7 @@
 
 <br>
 
-### Repository Method Naming Rules
+### 리포지토리 메서드 명명 규칙
 
 | Repository Method | Description                                           |
 |-------------------|-------------------------------------------------------|
@@ -30,9 +43,7 @@
 
 <br><br>
 
-## Rule & Convention
-
-### Git commit message convention
+### Git 커밋 메시지 규칙
 
 | Tag        | Description                                         |
 |------------|-----------------------------------------------------|
