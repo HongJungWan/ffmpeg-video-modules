@@ -1,0 +1,7 @@
+mariadb_host = "localhost"
+mariadb_user = "root"
+mariadb_password = "password"
+mariadb_db = "ffmpeg-video-database"
+mariadb_port = "3310"
+
+environment = "dev"
