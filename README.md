@@ -1,5 +1,31 @@
 # ffmpeg-video-modules
 
+### FFmpeg 및 FFprobe 설치 가이드 (Windows 10)
+
+```
+# 📌 FFmpeg 및 FFprobe 설치
+  - [FFmpeg 다운로드 페이지](https://ffmpeg.org/download.html)로 이동
+  - Windows 빌드 선택 (권장: [gyan.dev](https://www.gyan.dev/ffmpeg/builds/))
+  - "Release builds"에서 `ffmpeg-release-essentials.zip` 다운로드
+  - ZIP 파일을 `C:\ffmpeg`에 압축 해제
+
+
+# 📌 PATH 환경 변수 추가
+  - `C:\ffmpeg\bin` 경로 복사
+  - 내 PC → 속성 → 고급 시스템 설정 → 환경 변수 클릭
+  - 시스템 변수에서 `Path` 편집 → 새 경로에 `C:\ffmpeg\bin` 추가
+  - 모든 창 닫기
+
+
+# 📌 설치 확인
+  - Win + R → "cmd" 입력 후 실행
+  - `ffmpeg -version` 및 `ffprobe -version` 입력해 설치 확인
+```
+
+* 위 과정을 진행해야 Local 환경에서 ffmpeg 라이브러리를 사용할 수 있습니다.
+
+<br><br>
+
 ### 테스트 코드 실행 시키기
 
 ```
