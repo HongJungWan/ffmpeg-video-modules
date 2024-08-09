@@ -3,11 +3,12 @@ package main
 import (
 	"github.com/HongJungWan/ffmpeg-video-modules/app/helper"
 	"github.com/HongJungWan/ffmpeg-video-modules/app/infrastructure/router"
+	"gorm.io/gorm"
 	"net/http"
 )
 
-func startServer() {
-	routers := router.NewRouter(conf)
+func startServer(db *gorm.DB) {
+	routers := router.NewRouter(conf, db)
 
 	server := &http.Server{
 		Addr:    ":3031",

@@ -27,5 +27,5 @@ func main() {
 
 	logger.LogCurrentConfig(conf)
 
-	startServer()
+	startServer(db)
 }
