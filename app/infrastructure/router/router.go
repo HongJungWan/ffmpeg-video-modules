@@ -1,15 +1,18 @@
 package router
 
 import (
+	"github.com/HongJungWan/ffmpeg-video-modules/app/domain"
 	"github.com/HongJungWan/ffmpeg-video-modules/app/infrastructure/configs"
-	"github.com/HongJungWan/ffmpeg-video-modules/app/interfaces"
+	"github.com/HongJungWan/ffmpeg-video-modules/app/interfaces/controller"
+	"github.com/HongJungWan/ffmpeg-video-modules/app/interfaces/repository"
 	"github.com/HongJungWan/ffmpeg-video-modules/app/usecases"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 )
 
-func NewRouter(conf configs.Config) *gin.Engine {
+func NewRouter(conf configs.Config, db *gorm.DB) *gin.Engine {
 	service := gin.New()
 
 	config := cors.DefaultConfig()
@@ -23,12 +26,23 @@ func NewRouter(conf configs.Config) *gin.Engine {
 		ctx.JSON(http.StatusOK, "ffmpeg video modules")
 	})
 
+	db.Table("user").AutoMigrate(&domain.User{})
+	db.Table("video").AutoMigrate(&domain.Video{})
+	db.Table("user_video_permission").AutoMigrate(&domain.UserVideoPermission{})
+	db.Table("video_job").AutoMigrate(&domain.VideoJob{})
+
 	router := service.Group("/api")
 
-	// Use Case 및 Controller 설정
+	// Health Check 관련 설정
 	healthCheckInteractor := usecases.NewHealthCheckInteractor()
-	healthCheckController := interfaces.NewHealthCheckController(healthCheckInteractor)
+	healthCheckController := controller.NewHealthCheckController(healthCheckInteractor)
 	router.GET("/health", healthCheckController.HealthCheck)
+
+	// Video 관련 설정
+	videoRepository := repository.NewVideoRepository(db)
+	videoInteractor := usecases.NewVideoInteractor(videoRepository)
+	videoController := controller.NewVideoController(videoInteractor)
+	router.POST("/videos", videoController.UploadVideo)
 
 	return service
 }
