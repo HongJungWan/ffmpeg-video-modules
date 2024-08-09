@@ -26,6 +26,15 @@
 
 <br><br>
 
+### 실행
+
+```
+# 📌 GoLand IDE 기준
+Program arguments : -c app/deploy/dev/config.toml
+```
+
+<br><br>
+
 ### 테스트 코드 실행 시키기
 
 ```
