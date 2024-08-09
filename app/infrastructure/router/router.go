@@ -26,22 +26,34 @@ func NewRouter(conf configs.Config, db *gorm.DB) *gin.Engine {
 		ctx.JSON(http.StatusOK, "ffmpeg video modules")
 	})
 
+	// 데이터베이스 마이그레이션
 	db.Table("video").AutoMigrate(&domain.Video{})
 	db.Table("video_job").AutoMigrate(&domain.VideoJob{})
 	db.Table("final_video").AutoMigrate(&domain.FinalVideo{})
 
-	router := service.Group("/api")
-
 	// Health Check 관련 설정
 	healthCheckInteractor := usecases.NewHealthCheckInteractor()
 	healthCheckController := controller.NewHealthCheckController(healthCheckInteractor)
-	router.GET("/health", healthCheckController.HealthCheck)
 
 	// Video 관련 설정
 	videoRepository := repository.NewVideoRepository(db)
 	videoInteractor := usecases.NewVideoInteractor(videoRepository)
 	videoController := controller.NewVideoController(videoInteractor)
+
+	// VideoJob 관련 설정 (Trim, Concat, Execute)
+	videoJobRepository := repository.NewVideoJobRepository(db)
+	videoJobInteractor := usecases.NewVideoJobInteractor(videoJobRepository, videoRepository)
+	videoJobController := controller.NewVideoJobController(videoJobInteractor)
+
+	router := service.Group("/api")
+
+	router.GET("/health", healthCheckController.HealthCheck)
+
 	router.POST("/videos", videoController.UploadVideo)
+	router.POST("/videos/:id/trim", videoJobController.TrimVideo)
+	router.POST("/videos/concat", videoJobController.ConcatVideos)
+
+	router.POST("/jobs/execute", videoJobController.ExecuteJobs)
 
 	return service
 }
