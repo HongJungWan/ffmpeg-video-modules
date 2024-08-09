@@ -1,5 +1,4 @@
--- Users 테이블 생성
-CREATE TABLE Users (
+CREATE TABLE user (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     Username VARCHAR(255) NOT NULL,
     Email VARCHAR(255) NOT NULL UNIQUE,
@@ -8,18 +7,29 @@ CREATE TABLE Users (
     UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Videos 테이블 생성
-CREATE TABLE Videos (
+CREATE TABLE video (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     Filename VARCHAR(255) NOT NULL,
     FilePath VARCHAR(255) NOT NULL,
+    Duration INT,
     Status ENUM('uploaded', 'processed', 'failed') DEFAULT 'uploaded',
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- VideoJobs 테이블 생성
-CREATE TABLE VideoJobs (
+CREATE TABLE final_video (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    OriginalVideoID INT, -- 원본 동영상 ID 참조
+    Filename VARCHAR(255) NOT NULL,
+    FilePath VARCHAR(255) NOT NULL,
+    Duration INT,
+    Status ENUM('processed', 'failed') DEFAULT 'processed',
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (OriginalVideoID) REFERENCES video(ID) ON DELETE CASCADE -- 원본 동영상과 관계 설정
+);
+
+CREATE TABLE video_job (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     VideoID INT,
     JobType ENUM('trim', 'concat') NOT NULL,
@@ -31,8 +41,7 @@ CREATE TABLE VideoJobs (
     FOREIGN KEY (VideoID) REFERENCES Videos(ID) ON DELETE CASCADE
 );
 
--- UserVideoPermissions 테이블 생성
-CREATE TABLE UserVideoPermissions (
+CREATE TABLE user_video_permission (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
     VideoID INT,
