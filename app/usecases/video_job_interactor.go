@@ -3,10 +3,10 @@ package usecases
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/HongJungWan/ffmpeg-video-modules/app/domain"
 	"github.com/HongJungWan/ffmpeg-video-modules/app/infrastructure/ffmpeg"
 	"github.com/HongJungWan/ffmpeg-video-modules/app/interfaces/repository"
+	"path/filepath"
 )
 
 type VideoJobInteractor interface {
@@ -28,14 +28,20 @@ func NewVideoJobInteractor(videoJobRepo repository.VideoJobRepository, videoRepo
 }
 
 func (vji *VideoJobInteractorImpl) TrimVideo(videoID int, trimStart string, trimEnd string) (int, error) {
-	_, err := vji.videoRepo.FindByID(videoID)
+	video, err := vji.videoRepo.FindByID(videoID)
 	if err != nil {
 		return 0, fmt.Errorf("비디오를 찾을 수 없습니다: %w", err)
 	}
 
+	// execute_job_done 경로를 중복으로 추가하지 않도록 수정
+	outputFilename := fmt.Sprintf("trimmed_%s", video.Filename)
+	outputPath := filepath.Join("execute_job_done", outputFilename)
+
 	job := domain.NewVideoJob(videoID, domain.Trim, map[string]interface{}{
-		"trimStart": trimStart,
-		"trimEnd":   trimEnd,
+		"inputPath":  video.Filename,
+		"outputPath": outputPath,
+		"trimStart":  trimStart,
+		"trimEnd":    trimEnd,
 	})
 	if err := vji.videoJobRepo.Save(job); err != nil {
 		return 0, fmt.Errorf("작업을 저장할 수 없습니다: %w", err)
@@ -49,11 +55,21 @@ func (vji *VideoJobInteractorImpl) ConcatVideos(videoIDs []int) (int, error) {
 		return 0, fmt.Errorf("비디오 ID 목록이 비어 있습니다")
 	}
 
-	// 첫 번째 비디오 ID를 videoID로 설정
-	videoID := videoIDs[0]
+	var inputFilenames []string
+	for _, videoID := range videoIDs {
+		video, err := vji.videoRepo.FindByID(videoID)
+		if err != nil {
+			return 0, fmt.Errorf("비디오를 찾을 수 없습니다: %w", err)
+		}
+		inputFilenames = append(inputFilenames, video.Filename)
+	}
 
-	job := domain.NewVideoJob(videoID, domain.Concat, map[string]interface{}{
-		"videoIDs": videoIDs,
+	outputFilename := "concatenated_video.mp4"
+	outputPath := filepath.Join("execute_job_done", outputFilename)
+
+	job := domain.NewVideoJob(videoIDs[0], domain.Concat, map[string]interface{}{
+		"inputPaths": inputFilenames,
+		"outputPath": outputPath,
 	})
 	if err := vji.videoJobRepo.Save(job); err != nil {
 		return 0, fmt.Errorf("작업을 저장할 수 없습니다: %w", err)
@@ -82,41 +98,23 @@ func (vji *VideoJobInteractorImpl) ExecuteJobs() error {
 		var execErr error
 		switch job.JobType {
 		case domain.Trim:
-			inputPath, ok := parameters["inputPath"].(string)
-			if !ok {
-				return fmt.Errorf("inputPath 파라미터가 없거나 잘못되었습니다")
-			}
-			outputPath, ok := parameters["outputPath"].(string)
-			if !ok {
-				return fmt.Errorf("outputPath 파라미터가 없거나 잘못되었습니다")
-			}
-			trimStart, ok := parameters["trimStart"].(string)
-			if !ok {
-				return fmt.Errorf("trimStart 파라미터가 없거나 잘못되었습니다")
-			}
-			trimEnd, ok := parameters["trimEnd"].(string)
-			if !ok {
-				return fmt.Errorf("trimEnd 파라미터가 없거나 잘못되었습니다")
-			}
+			inputPath := parameters["inputPath"].(string)
+			outputPath := parameters["outputPath"].(string)
+			trimStart := parameters["trimStart"].(string)
+			trimEnd := parameters["trimEnd"].(string)
+
 			execErr = ffmpeg.TrimVideo(inputPath, outputPath, trimStart, trimEnd)
+
 		case domain.Concat:
-			inputPaths, ok := parameters["inputPaths"].([]interface{})
-			if !ok || len(inputPaths) == 0 {
-				return fmt.Errorf("inputPaths 파라미터가 없거나 잘못되었습니다")
+			inputPathsInterface := parameters["inputPaths"].([]interface{})
+			inputPaths := make([]string, len(inputPathsInterface))
+
+			for i, path := range inputPathsInterface {
+				inputPaths[i] = path.(string)
 			}
-			strInputPaths := make([]string, len(inputPaths))
-			for i, path := range inputPaths {
-				strPath, ok := path.(string)
-				if !ok {
-					return fmt.Errorf("inputPaths 내부에 잘못된 데이터가 포함되어 있습니다")
-				}
-				strInputPaths[i] = strPath
-			}
-			outputPath, ok := parameters["outputPath"].(string)
-			if !ok {
-				return fmt.Errorf("outputPath 파라미터가 없거나 잘못되었습니다")
-			}
-			execErr = ffmpeg.ConcatVideos(strInputPaths, outputPath)
+			outputPath := parameters["outputPath"].(string)
+
+			execErr = ffmpeg.ConcatVideos(inputPaths, outputPath)
 		}
 
 		if execErr != nil {
