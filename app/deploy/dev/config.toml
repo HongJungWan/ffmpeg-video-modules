@@ -1,7 +1,17 @@
+## ✨ 참고용
+
+# MariaDB 설정
 mariadb_host = "localhost"
 mariadb_user = "root"
 mariadb_password = "password"
 mariadb_db = "ffmpeg-video-database"
 mariadb_port = "3310"
 
+# 환경 설정
 environment = "dev"
+
+# AWS S3 설정
+aws_access_key_id = "dummy"
+aws_secret_access_key = "dummy"
+aws_region = "dummy"
+s3_bucket_name = "dummy"

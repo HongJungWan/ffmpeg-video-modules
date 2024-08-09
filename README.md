@@ -17,6 +17,14 @@ go tool cover -html=coverage.out
 
 <br><br>
 
+### 헬스 체크 API 테스트
+
+```git bash
+$ curl --http1.1 http://localhost:3031/api/health
+```
+
+<br><br>
+
 ### 컨트롤러 메서드 명명 규칙
 
 | Controller Method | HTTP Method | Description                           |
