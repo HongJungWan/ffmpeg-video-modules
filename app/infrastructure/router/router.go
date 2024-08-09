@@ -26,10 +26,9 @@ func NewRouter(conf configs.Config, db *gorm.DB) *gin.Engine {
 		ctx.JSON(http.StatusOK, "ffmpeg video modules")
 	})
 
-	db.Table("user").AutoMigrate(&domain.User{})
 	db.Table("video").AutoMigrate(&domain.Video{})
-	db.Table("user_video_permission").AutoMigrate(&domain.UserVideoPermission{})
 	db.Table("video_job").AutoMigrate(&domain.VideoJob{})
+	db.Table("final_video").AutoMigrate(&domain.FinalVideo{})
 
 	router := service.Group("/api")
 
