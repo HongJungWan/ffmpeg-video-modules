@@ -5,6 +5,9 @@ import (
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"log"
 	"os"
+	"os/exec"
+	"strconv"
+	"strings"
 )
 
 type Job struct {
@@ -15,6 +18,8 @@ type Job struct {
 	EndTime    string
 	InputPaths []string
 }
+
+const FFMPEG_PATH = "C:\\ffmpeg\\bin\\ffprobe"
 
 func TrimVideo(inputPath string, outputPath string, startTime string, endTime string) error {
 	log.Printf("Executing ffmpeg command: Trim video from %s to %s", startTime, endTime)
@@ -74,4 +79,23 @@ func ExecuteJobs(jobs []Job) error {
 		}
 	}
 	return nil
+}
+
+func GetVideoDuration(filePath string) (int, error) {
+	cmd := exec.Command(FFMPEG_PATH, "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", filePath)
+	output, err := cmd.Output()
+	if err != nil {
+		return 0, fmt.Errorf("비디오 정보를 불러오지 못했습니다: %w", err)
+	}
+
+	// 문자열의 불필요한 공백 및 줄 바꿈 문자 제거
+	durationString := strings.TrimSpace(string(output))
+
+	// 문자열을 float64로 변환
+	duration, err := strconv.ParseFloat(durationString, 64)
+	if err != nil {
+		return 0, fmt.Errorf("동영상 길이를 변환할 수 없습니다: %w", err)
+	}
+
+	return int(duration), nil
 }
