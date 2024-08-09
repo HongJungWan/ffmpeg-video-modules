@@ -2,39 +2,30 @@ package ffmpeg
 
 import (
 	"fmt"
-	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"log"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 )
 
-type Job struct {
-	Type       string
-	InputPath  string
-	OutputPath string
-	StartTime  string
-	EndTime    string
-	InputPaths []string
-}
-
 const (
-	FFMPEG_PATH          = "C:\\ffmpeg\\bin\\ffprobe"
-	UPLOADS_DIR          = "uploads"
-	EXECUTE_JOB_DONE_DIR = "execute_job_done"
+	FFMPEG_PATH   = "C:\\ffmpeg\\bin\\ffmpeg.exe" // 경로 수정
+	UPLOADS_DIR   = "uploads"
+	DOWNLOADS_DIR = "downloads" // 변경된 결과물 저장 디렉토리
 )
 
 func TrimVideo(inputFilename string, outputFilename string, startTime string, endTime string) error {
 	inputPath := filepath.Join(UPLOADS_DIR, inputFilename)
-	outputPath := filepath.Join(EXECUTE_JOB_DONE_DIR, outputFilename)
+	outputPath := outputFilename
+	if !strings.HasPrefix(outputFilename, DOWNLOADS_DIR) {
+		outputPath = filepath.Join(DOWNLOADS_DIR, outputFilename)
+	}
+
 	log.Printf("Executing ffmpeg command: Trim video from %s to %s", startTime, endTime)
-	err := ffmpeg.Input(inputPath).
-		Trim(ffmpeg.KwArgs{"start": startTime, "end": endTime}).
-		Output(outputPath).
-		OverWriteOutput().
-		Run()
+	cmd := exec.Command(FFMPEG_PATH, "-i", inputPath, "-ss", startTime, "-to", endTime, "-c", "copy", outputPath, "-y")
+	log.Printf("Compiled command: %s", strings.Join(cmd.Args, " "))
+	err := cmd.Run()
 	if err != nil {
 		return fmt.Errorf("비디오 자르기 실패: %w", err)
 	}
@@ -42,56 +33,29 @@ func TrimVideo(inputFilename string, outputFilename string, startTime string, en
 }
 
 func ConcatVideos(inputFilenames []string, outputFilename string) error {
-	fileList := "inputs.txt"
-	f, err := os.Create(fileList)
-	if err != nil {
-		return fmt.Errorf("파일 목록 생성 실패: %w", err)
-	}
-	defer os.Remove(fileList)
+	// 입력 파일 목록을 ffmpeg 명령어에 맞게 작성합니다.
+	fileList := "concat:" + strings.Join(inputFilenames, "|")
 
-	for _, filename := range inputFilenames {
-		path := filepath.Join(UPLOADS_DIR, filename)
-		_, err := f.WriteString(fmt.Sprintf("file '%s'\n", path))
-		if err != nil {
-			return fmt.Errorf("파일 목록에 기록 실패: %w", err)
-		}
+	// 출력 경로 설정
+	outputPath := outputFilename
+	if !strings.HasPrefix(outputFilename, DOWNLOADS_DIR) {
+		outputPath = filepath.Join(DOWNLOADS_DIR, outputFilename)
 	}
-	f.Close()
 
-	outputPath := filepath.Join(EXECUTE_JOB_DONE_DIR, outputFilename)
-	log.Printf("Executing ffmpeg command: Concat videos into %s", outputFilename)
-	err = ffmpeg.Input(fileList, ffmpeg.KwArgs{"f": "concat", "safe": "0"}).
-		Output(outputPath, ffmpeg.KwArgs{"c": "copy"}).
-		OverWriteOutput().
-		Run()
+	// ffmpeg 명령어를 실행합니다.
+	log.Printf("Executing ffmpeg command: Concat videos into %s", outputPath)
+	cmd := exec.Command(FFMPEG_PATH, "-i", fileList, "-c", "copy", outputPath, "-y")
+	log.Printf("Compiled command: %s", strings.Join(cmd.Args, " "))
+	err := cmd.Run()
 	if err != nil {
 		return fmt.Errorf("비디오 연결 실패: %w", err)
 	}
-	return nil
-}
 
-func ExecuteJobs(jobs []Job) error {
-	for _, job := range jobs {
-		switch job.Type {
-		case "trim":
-			err := TrimVideo(job.InputPath, job.OutputPath, job.StartTime, job.EndTime)
-			if err != nil {
-				return fmt.Errorf("자르기 작업 실패: %w", err)
-			}
-		case "concat":
-			err := ConcatVideos(job.InputPaths, job.OutputPath)
-			if err != nil {
-				return fmt.Errorf("연결 작업 실패: %w", err)
-			}
-		default:
-			return fmt.Errorf("알 수 없는 작업 유형: %s", job.Type)
-		}
-	}
 	return nil
 }
 
 func GetVideoDuration(filePath string) (int, error) {
-	cmd := exec.Command(FFMPEG_PATH, "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", filePath)
+	cmd := exec.Command(FFMPEG_PATH, "-i", filePath, "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1")
 	output, err := cmd.Output()
 	if err != nil {
 		return 0, fmt.Errorf("비디오 정보를 불러오지 못했습니다: %w", err)

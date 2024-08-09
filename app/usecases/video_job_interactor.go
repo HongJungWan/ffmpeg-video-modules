@@ -6,6 +6,7 @@ import (
 	"github.com/HongJungWan/ffmpeg-video-modules/app/domain"
 	"github.com/HongJungWan/ffmpeg-video-modules/app/infrastructure/ffmpeg"
 	"github.com/HongJungWan/ffmpeg-video-modules/app/interfaces/repository"
+	"os"
 	"path/filepath"
 )
 
@@ -14,6 +15,11 @@ type VideoJobInteractor interface {
 	ConcatVideos(videoIDs []int) (int, error)
 	ExecuteJobs() error
 }
+
+const (
+	UPLOADS_DIR   = "uploads"
+	DOWNLOADS_DIR = "downloads" // 변경된 결과물 저장 디렉토리
+)
 
 type VideoJobInteractorImpl struct {
 	videoJobRepo repository.VideoJobRepository
@@ -33,9 +39,13 @@ func (vji *VideoJobInteractorImpl) TrimVideo(videoID int, trimStart string, trim
 		return 0, fmt.Errorf("비디오를 찾을 수 없습니다: %w", err)
 	}
 
-	// execute_job_done 경로를 중복으로 추가하지 않도록 수정
+	// downloads 폴더 경로 생성
+	if err := os.MkdirAll(DOWNLOADS_DIR, os.ModePerm); err != nil {
+		return 0, fmt.Errorf("다운로드 디렉토리를 생성할 수 없습니다: %w", err)
+	}
+
 	outputFilename := fmt.Sprintf("trimmed_%s", video.Filename)
-	outputPath := filepath.Join("execute_job_done", outputFilename)
+	outputPath := filepath.Join(DOWNLOADS_DIR, outputFilename)
 
 	job := domain.NewVideoJob(videoID, domain.Trim, map[string]interface{}{
 		"inputPath":  video.Filename,
@@ -55,17 +65,22 @@ func (vji *VideoJobInteractorImpl) ConcatVideos(videoIDs []int) (int, error) {
 		return 0, fmt.Errorf("비디오 ID 목록이 비어 있습니다")
 	}
 
+	// downloads 폴더 경로 생성
+	if err := os.MkdirAll(DOWNLOADS_DIR, os.ModePerm); err != nil {
+		return 0, fmt.Errorf("다운로드 디렉토리를 생성할 수 없습니다: %w", err)
+	}
+
 	var inputFilenames []string
 	for _, videoID := range videoIDs {
 		video, err := vji.videoRepo.FindByID(videoID)
 		if err != nil {
 			return 0, fmt.Errorf("비디오를 찾을 수 없습니다: %w", err)
 		}
-		inputFilenames = append(inputFilenames, video.Filename)
+		inputFilenames = append(inputFilenames, filepath.Join(UPLOADS_DIR, video.Filename))
 	}
 
 	outputFilename := "concatenated_video.mp4"
-	outputPath := filepath.Join("execute_job_done", outputFilename)
+	outputPath := filepath.Join(DOWNLOADS_DIR, outputFilename)
 
 	job := domain.NewVideoJob(videoIDs[0], domain.Concat, map[string]interface{}{
 		"inputPaths": inputFilenames,
@@ -119,6 +134,8 @@ func (vji *VideoJobInteractorImpl) ExecuteJobs() error {
 
 		if execErr != nil {
 			job.UpdateStatus(domain.JobFailed)
+			vji.videoJobRepo.UpdateStatus(job)
+			return execErr
 		} else {
 			job.UpdateStatus(domain.Completed)
 		}
