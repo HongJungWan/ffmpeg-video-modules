@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -32,10 +33,13 @@ const (
 )
 
 func NewVideoJob(videoID int, jobType VideoJobType, parameters map[string]interface{}) *VideoJob {
+	// map을 JSON 문자열로 변환
+	parametersJSON, _ := json.Marshal(parameters)
+
 	return &VideoJob{
 		VideoID:    videoID,
 		JobType:    jobType,
-		Parameters: parameters,
+		Parameters: string(parametersJSON),
 		Status:     Pending,
 		CreatedAt:  time.Now(),
 	}
