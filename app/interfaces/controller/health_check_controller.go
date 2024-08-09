@@ -1,4 +1,4 @@
-package interfaces
+package controller
 
 import (
 	"github.com/HongJungWan/ffmpeg-video-modules/app/usecases"
