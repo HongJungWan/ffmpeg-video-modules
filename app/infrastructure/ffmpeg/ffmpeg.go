@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -19,9 +20,15 @@ type Job struct {
 	InputPaths []string
 }
 
-const FFMPEG_PATH = "C:\\ffmpeg\\bin\\ffprobe"
+const (
+	FFMPEG_PATH          = "C:\\ffmpeg\\bin\\ffprobe"
+	UPLOADS_DIR          = "uploads"
+	EXECUTE_JOB_DONE_DIR = "execute_job_done"
+)
 
-func TrimVideo(inputPath string, outputPath string, startTime string, endTime string) error {
+func TrimVideo(inputFilename string, outputFilename string, startTime string, endTime string) error {
+	inputPath := filepath.Join(UPLOADS_DIR, inputFilename)
+	outputPath := filepath.Join(EXECUTE_JOB_DONE_DIR, outputFilename)
 	log.Printf("Executing ffmpeg command: Trim video from %s to %s", startTime, endTime)
 	err := ffmpeg.Input(inputPath).
 		Trim(ffmpeg.KwArgs{"start": startTime, "end": endTime}).
@@ -34,7 +41,7 @@ func TrimVideo(inputPath string, outputPath string, startTime string, endTime st
 	return nil
 }
 
-func ConcatVideos(inputPaths []string, outputPath string) error {
+func ConcatVideos(inputFilenames []string, outputFilename string) error {
 	fileList := "inputs.txt"
 	f, err := os.Create(fileList)
 	if err != nil {
@@ -42,7 +49,8 @@ func ConcatVideos(inputPaths []string, outputPath string) error {
 	}
 	defer os.Remove(fileList)
 
-	for _, path := range inputPaths {
+	for _, filename := range inputFilenames {
+		path := filepath.Join(UPLOADS_DIR, filename)
 		_, err := f.WriteString(fmt.Sprintf("file '%s'\n", path))
 		if err != nil {
 			return fmt.Errorf("파일 목록에 기록 실패: %w", err)
@@ -50,7 +58,8 @@ func ConcatVideos(inputPaths []string, outputPath string) error {
 	}
 	f.Close()
 
-	log.Printf("Executing ffmpeg command: Concat videos into %s", outputPath)
+	outputPath := filepath.Join(EXECUTE_JOB_DONE_DIR, outputFilename)
+	log.Printf("Executing ffmpeg command: Concat videos into %s", outputFilename)
 	err = ffmpeg.Input(fileList, ffmpeg.KwArgs{"f": "concat", "safe": "0"}).
 		Output(outputPath, ffmpeg.KwArgs{"c": "copy"}).
 		OverWriteOutput().
