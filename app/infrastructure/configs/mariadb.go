@@ -13,7 +13,7 @@ const (
 	charset        = "utf8mb4"
 	parseTime      = "True"
 	loc            = "Local"
-	defaultLogMode = logger.Silent
+	defaultLogMode = logger.Info
 )
 
 func ConnectionDB(config *Config) *gorm.DB {
