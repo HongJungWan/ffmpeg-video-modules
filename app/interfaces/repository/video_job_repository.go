@@ -10,6 +10,7 @@ type VideoJobRepository interface {
 	FindByID(id int) (*domain.VideoJob, error)
 	FindPendingJobs() ([]*domain.VideoJob, error)
 	UpdateStatus(job *domain.VideoJob) error
+	FindByVideoIDAndType(videoID int, jobType domain.VideoJobType) ([]*domain.VideoJob, error)
 }
 
 type VideoJobRepositoryImpl struct {
@@ -38,4 +39,12 @@ func (repo *VideoJobRepositoryImpl) FindPendingJobs() ([]*domain.VideoJob, error
 
 func (repo *VideoJobRepositoryImpl) UpdateStatus(job *domain.VideoJob) error {
 	return repo.DB.Model(&job).Update("status", job.Status).Error
+}
+
+func (repo *VideoJobRepositoryImpl) FindByVideoIDAndType(videoID int, jobType domain.VideoJobType) ([]*domain.VideoJob, error) {
+	var jobs []*domain.VideoJob
+	err := repo.DB.
+		Where("video_id = ? AND job_type = ?", videoID, jobType).
+		Find(&jobs).Error
+	return jobs, err
 }
