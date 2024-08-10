@@ -1,5 +1,17 @@
 # ffmpeg-video-modules
 
+<br>
+
+### 핵심 문제 해결 전략 아티클 🧐
+
+* 아티클 1
+* 아티클 2
+
+
+* ETC. 과제 회고 아티클
+
+<br><br>
+
 ### FFmpeg 및 FFprobe 설치 가이드 (Windows 10)
 
 ```
@@ -42,7 +54,11 @@ docker run -d --name mariadb -p 3310:3306 -v mysql_db:/var/lib/mysql --network m
 
 ```
 # 📌 GoLand IDE 기준
-Program arguments : -c app/deploy/dev/config.toml
+Program arguments : -c cmd/deploy/dev/config.toml
+
+
+# 📌Terminal 기준
+
 ```
 
 <br><br>
@@ -89,29 +105,17 @@ ffmpeg -f lavfi -i color=c=purple:s=320x240:d=6 -vf "drawtext=fontfile='C\\Windo
 
 <br><br>
 
-### 컨트롤러 메서드 명명 규칙
+### Application Server Architecture
 
-| Controller Method | HTTP Method | Description                           |
-|-------------------|-------------|---------------------------------------|
-| `Index`           | GET         | 리소스의 목록을 표시합니다.              |
-| `Store`           | POST        | 새로 생성된 리소스를 저장소에 저장합니다. |
-| `Show`            | GET         | 지정된 리소스를 표시합니다.              |
-| `Update`          | PUT/PATCH   | 지정된 리소스를 저장소에서 업데이트합니다. |
-| `Destroy`         | DELETE      | 저장소에서 지정된 리소스를 제거합니다.    |
+<img src="docs/server-architecture.png" alt="Application Server Architecture" width="800"/>
 
-<br>
+📌 [참고 Link](https://github.com/bxcodec/go-clean-arch)
 
-### 리포지토리 메서드 명명 규칙
+<br><br>
 
-| Repository Method | Description                                           |
-|-------------------|-------------------------------------------------------|
-| `FindByXX`        | 주어진 XX로 식별된 엔티티를 반환합니다.                   |
-| `FindAll`         | 모든 엔티티를 반환합니다.                               |
-| `Save`            | 주어진 엔티티를 저장합니다.                             |
-| `SaveByXX`        | 주어진 XX로 식별된 엔티티를 저장합니다.                   |
-| `DeleteByXX`      | 주어진 XX로 식별된 엔티티를 삭제합니다.                   |
-| `Count`           | 엔티티의 개수를 반환합니다.                             |
-| `ExistsBy`        | 주어진 ID를 가진 엔티티가 존재하는지 여부를 나타냅니다.    |
+### ERD(Entity Relationship Diagram)
+
+<img src="docs/erd.png" alt="ERD Diagram" width="600"/>
 
 <br><br>
 

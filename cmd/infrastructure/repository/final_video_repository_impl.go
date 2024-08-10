@@ -1,21 +1,16 @@
 package repository
 
 import (
-	"github.com/HongJungWan/ffmpeg-video-modules/app/domain"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain/repository"
 	"gorm.io/gorm"
 )
-
-type FinalVideoRepository interface {
-	SaveFinalVideo(finalVideo *domain.FinalVideo) error
-	FindFinalVideoByID(id int) (*domain.FinalVideo, error)
-	FindFinalVideoByOriginalVideoID(originalVideoID int) (*domain.FinalVideo, error)
-}
 
 type FinalVideoRepositoryImpl struct {
 	DB *gorm.DB
 }
 
-func NewFinalVideoRepository(db *gorm.DB) *FinalVideoRepositoryImpl {
+func NewFinalVideoRepository(db *gorm.DB) repository.FinalVideoRepository {
 	return &FinalVideoRepositoryImpl{DB: db}
 }
 
@@ -33,9 +28,7 @@ func (fv *FinalVideoRepositoryImpl) FindFinalVideoByID(id int) (*domain.FinalVid
 
 func (fv *FinalVideoRepositoryImpl) FindFinalVideoByOriginalVideoID(originalVideoID int) (*domain.FinalVideo, error) {
 	var finalVideo domain.FinalVideo
-	err := fv.DB.
-		Where("original_video_id = ?", originalVideoID).
-		First(&finalVideo).Error
+	err := fv.DB.Where("original_video_id = ?", originalVideoID).First(&finalVideo).Error
 	if err != nil {
 		return nil, err
 	}

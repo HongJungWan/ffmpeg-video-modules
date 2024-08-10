@@ -1,23 +1,16 @@
 package repository
 
 import (
-	"github.com/HongJungWan/ffmpeg-video-modules/app/domain"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain/repository"
 	"gorm.io/gorm"
 )
-
-type VideoJobRepository interface {
-	Save(job *domain.VideoJob) error
-	FindByID(id int) (*domain.VideoJob, error)
-	FindPendingJobs() ([]*domain.VideoJob, error)
-	UpdateStatus(job *domain.VideoJob) error
-	FindByVideoIDAndType(videoID int, jobType domain.VideoJobType) ([]*domain.VideoJob, error)
-}
 
 type VideoJobRepositoryImpl struct {
 	DB *gorm.DB
 }
 
-func NewVideoJobRepository(db *gorm.DB) *VideoJobRepositoryImpl {
+func NewVideoJobRepository(db *gorm.DB) repository.VideoJobRepository {
 	return &VideoJobRepositoryImpl{DB: db}
 }
 
@@ -43,8 +36,6 @@ func (repo *VideoJobRepositoryImpl) UpdateStatus(job *domain.VideoJob) error {
 
 func (repo *VideoJobRepositoryImpl) FindByVideoIDAndType(videoID int, jobType domain.VideoJobType) ([]*domain.VideoJob, error) {
 	var jobs []*domain.VideoJob
-	err := repo.DB.
-		Where("video_id = ? AND job_type = ?", videoID, jobType).
-		Find(&jobs).Error
+	err := repo.DB.Where("video_id = ? AND job_type = ?", videoID, jobType).Find(&jobs).Error
 	return jobs, err
 }

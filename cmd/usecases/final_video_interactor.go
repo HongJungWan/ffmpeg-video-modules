@@ -2,10 +2,9 @@ package usecases
 
 import (
 	"fmt"
-	"github.com/HongJungWan/ffmpeg-video-modules/app/interfaces/dto/response"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain/repository"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/interfaces/dto/response"
 	"path/filepath"
-
-	"github.com/HongJungWan/ffmpeg-video-modules/app/interfaces/repository"
 )
 
 type FinalVideoInteractor interface {

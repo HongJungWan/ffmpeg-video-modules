@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/HongJungWan/ffmpeg-video-modules/app/usecases"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/usecases"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
