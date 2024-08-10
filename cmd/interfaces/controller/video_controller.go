@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/HongJungWan/ffmpeg-video-modules/app/usecases"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/usecases"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

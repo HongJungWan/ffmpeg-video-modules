@@ -1,11 +1,11 @@
 package controller
 
 import (
-	"github.com/HongJungWan/ffmpeg-video-modules/app/interfaces/dto/request"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/interfaces/dto/request"
 	"net/http"
 	"strconv"
 
-	"github.com/HongJungWan/ffmpeg-video-modules/app/usecases"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/usecases"
 	"github.com/gin-gonic/gin"
 )
 

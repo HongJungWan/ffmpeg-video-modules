@@ -2,7 +2,7 @@ package configs
 
 import (
 	"fmt"
-	"github.com/HongJungWan/ffmpeg-video-modules/app/helper"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/helper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

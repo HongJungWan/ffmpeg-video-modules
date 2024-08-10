@@ -3,9 +3,9 @@ package usecases
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/HongJungWan/ffmpeg-video-modules/app/domain"
-	"github.com/HongJungWan/ffmpeg-video-modules/app/infrastructure/ffmpeg"
-	"github.com/HongJungWan/ffmpeg-video-modules/app/interfaces/repository"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain/repository"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/infrastructure/ffmpeg"
 	"os"
 	"path/filepath"
 )
