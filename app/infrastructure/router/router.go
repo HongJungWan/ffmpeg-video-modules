@@ -31,19 +31,24 @@ func NewRouter(conf configs.Config, db *gorm.DB) *gin.Engine {
 	db.Table("video_job").AutoMigrate(&domain.VideoJob{})
 	db.Table("final_video").AutoMigrate(&domain.FinalVideo{})
 
+	service.Static("/downloads", "./downloads")
+
 	// Health Check 관련 설정
 	healthCheckInteractor := usecases.NewHealthCheckInteractor()
 	healthCheckController := controller.NewHealthCheckController(healthCheckInteractor)
 
-	// Video 관련 설정
+	// 비즈니스 로직 관련 설정
 	videoRepository := repository.NewVideoRepository(db)
-	videoInteractor := usecases.NewVideoInteractor(videoRepository)
-	videoController := controller.NewVideoController(videoInteractor)
-
-	// VideoJob 관련 설정 (Trim, Concat, Execute)
 	videoJobRepository := repository.NewVideoJobRepository(db)
-	videoJobInteractor := usecases.NewVideoJobInteractor(videoJobRepository, videoRepository)
+	finalVideoRepository := repository.NewFinalVideoRepository(db)
+
+	videoInteractor := usecases.NewVideoInteractor(videoRepository, videoJobRepository, finalVideoRepository)
+	videoJobInteractor := usecases.NewVideoJobInteractor(videoJobRepository, videoRepository, finalVideoRepository)
+	finalVideoInteractor := usecases.NewFinalVideoInteractor(finalVideoRepository)
+
+	videoController := controller.NewVideoController(videoInteractor)
 	videoJobController := controller.NewVideoJobController(videoJobInteractor)
+	finalVideoController := controller.NewFinalVideoController(finalVideoInteractor)
 
 	router := service.Group("/api")
 
@@ -52,6 +57,8 @@ func NewRouter(conf configs.Config, db *gorm.DB) *gin.Engine {
 	router.POST("/videos", videoController.UploadVideo)
 	router.POST("/videos/:id/trim", videoJobController.TrimVideo)
 	router.POST("/videos/concat", videoJobController.ConcatVideos)
+	router.GET("/videos/:fid/download", finalVideoController.DownloadFinalVideo)
+	router.GET("/videos", videoController.GetVideoDetails)
 
 	router.POST("/jobs/execute", videoJobController.ExecuteJobs)
 
