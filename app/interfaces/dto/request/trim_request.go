@@ -1,4 +1,4 @@
-package dto
+package request
 
 type TrimVideoRequest struct {
 	TrimStart string `json:"trimStart" binding:"required"`

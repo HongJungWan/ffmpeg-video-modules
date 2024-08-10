@@ -10,7 +10,7 @@ COPY go.mod go.sum ./
 RUN go mod tidy
 
 # 애플리케이션 소스 코드 복사
-COPY . .
+COPY ../../../docker/go .
 
 # 애플리케이션 컴파일
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ffmpeg-video-modules ./app/main.go

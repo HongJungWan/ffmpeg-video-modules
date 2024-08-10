@@ -1,10 +1,10 @@
 package controller
 
 import (
+	"github.com/HongJungWan/ffmpeg-video-modules/app/interfaces/dto/request"
 	"net/http"
 	"strconv"
 
-	"github.com/HongJungWan/ffmpeg-video-modules/app/interfaces/dto"
 	"github.com/HongJungWan/ffmpeg-video-modules/app/usecases"
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +24,7 @@ func (vjc *VideoJobController) TrimVideo(ctx *gin.Context) {
 		return
 	}
 
-	var req dto.TrimVideoRequest
+	var req request.TrimVideoRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -40,7 +40,7 @@ func (vjc *VideoJobController) TrimVideo(ctx *gin.Context) {
 }
 
 func (vjc *VideoJobController) ConcatVideos(ctx *gin.Context) {
-	var req dto.ConcatVideosRequest
+	var req request.ConcatVideosRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
