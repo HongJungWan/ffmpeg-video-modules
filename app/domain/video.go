@@ -9,7 +9,7 @@ type Video struct {
 	Filename  string      `gorm:"type:varchar(255);not null" json:"filename"`
 	FilePath  string      `gorm:"type:varchar(255);not null" json:"filePath"`
 	Duration  int         `gorm:"type:int;not null" json:"duration"`
-	Status    VideoStatus `gorm:"type:ENUM('uploaded','processed','failed');default:'uploaded'" json:"status"`
+	Status    VideoStatus `gorm:"type:ENUM('uploaded','processed','failed','finished');default:'uploaded'" json:"status"`
 	CreatedAt time.Time   `gorm:"type:datetime;default:CURRENT_TIMESTAMP" json:"createdAt"`
 	UpdatedAt time.Time   `gorm:"type:datetime;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"updatedAt"`
 }
@@ -20,6 +20,7 @@ const (
 	Uploaded  VideoStatus = "uploaded"
 	Processed VideoStatus = "processed"
 	Failed    VideoStatus = "failed"
+	FINISHED  VideoStatus = "finished"
 )
 
 func NewVideo(filename, filePath string, duration int) *Video {
