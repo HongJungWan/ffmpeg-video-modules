@@ -22,14 +22,16 @@ const (
 )
 
 type VideoJobInteractorImpl struct {
-	videoJobRepo repository.VideoJobRepository
-	videoRepo    repository.VideoRepository
+	videoJobRepo   repository.VideoJobRepository
+	videoRepo      repository.VideoRepository
+	finalVideoRepo repository.FinalVideoRepository
 }
 
-func NewVideoJobInteractor(videoJobRepo repository.VideoJobRepository, videoRepo repository.VideoRepository) VideoJobInteractor {
+func NewVideoJobInteractor(videoJobRepo repository.VideoJobRepository, videoRepo repository.VideoRepository, finalVideoRepo repository.FinalVideoRepository) VideoJobInteractor {
 	return &VideoJobInteractorImpl{
-		videoJobRepo: videoJobRepo,
-		videoRepo:    videoRepo,
+		videoJobRepo:   videoJobRepo,
+		videoRepo:      videoRepo,
+		finalVideoRepo: finalVideoRepo,
 	}
 }
 
@@ -111,6 +113,9 @@ func (vji *VideoJobInteractorImpl) ExecuteJobs() error {
 		}
 
 		var execErr error
+		var finalFilename string
+		var finalDuration int
+
 		switch job.JobType {
 		case domain.Trim:
 			inputPath := parameters["inputPath"].(string)
@@ -119,6 +124,8 @@ func (vji *VideoJobInteractorImpl) ExecuteJobs() error {
 			trimEnd := parameters["trimEnd"].(string)
 
 			execErr = ffmpeg.TrimVideo(inputPath, outputPath, trimStart, trimEnd)
+			finalFilename = outputPath
+			finalDuration, _ = ffmpeg.GetVideoDuration(outputPath)
 
 		case domain.Concat:
 			inputPathsInterface := parameters["inputPaths"].([]interface{})
@@ -130,15 +137,32 @@ func (vji *VideoJobInteractorImpl) ExecuteJobs() error {
 			outputPath := parameters["outputPath"].(string)
 
 			execErr = ffmpeg.ConcatVideos(inputPaths, outputPath)
+			finalFilename = outputPath
+			finalDuration, _ = ffmpeg.GetVideoDuration(outputPath)
 		}
 
 		if execErr != nil {
 			job.UpdateStatus(domain.JobFailed)
 			vji.videoJobRepo.UpdateStatus(job)
+			// video 테이블의 상태를 failed로 업데이트
+			originalVideo, _ := vji.videoRepo.FindByID(job.VideoID)
+			originalVideo.UpdateStatus(domain.Failed)
+			vji.videoRepo.Save(originalVideo)
 			return execErr
 		} else {
 			job.UpdateStatus(domain.Completed)
 		}
+
+		// 작업이 완료되면 최종 비디오 정보 저장
+		originalVideo, _ := vji.videoRepo.FindByID(job.VideoID)
+		finalVideo := domain.NewFinalVideo(originalVideo.ID, filepath.Base(finalFilename), finalFilename, finalDuration)
+		if err := vji.finalVideoRepo.SaveFinalVideo(finalVideo); err != nil {
+			return fmt.Errorf("최종 비디오 정보를 저장할 수 없습니다: %w", err)
+		}
+
+		// video 테이블의 상태를 finished로 업데이트
+		originalVideo.UpdateStatus(domain.FINISHED)
+		vji.videoRepo.Save(originalVideo)
 
 		if err := vji.videoJobRepo.UpdateStatus(job); err != nil {
 			return fmt.Errorf("작업 상태를 업데이트할 수 없습니다: %w", err)
