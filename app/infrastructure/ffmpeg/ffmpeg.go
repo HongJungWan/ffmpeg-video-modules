@@ -55,9 +55,11 @@ func ConcatVideos(inputFilenames []string, outputFilename string) error {
 }
 
 func GetVideoDuration(filePath string) (int, error) {
-	cmd := exec.Command(FFMPEG_PATH, "-i", filePath, "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1")
-	output, err := cmd.Output()
+	// ffprobe 명령어로 변경
+	cmd := exec.Command("ffprobe", "-i", filePath, "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1")
+	output, err := cmd.CombinedOutput()
 	if err != nil {
+		fmt.Printf("Error executing command: %s\n", string(output))
 		return 0, fmt.Errorf("비디오 정보를 불러오지 못했습니다: %w", err)
 	}
 
