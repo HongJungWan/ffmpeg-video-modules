@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/HongJungWan/ffmpeg-video-modules/app/helper"
-	"github.com/HongJungWan/ffmpeg-video-modules/app/infrastructure/router"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/helper"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/infrastructure/router"
 	"gorm.io/gorm"
 	"net/http"
 )
