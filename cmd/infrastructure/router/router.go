@@ -3,7 +3,7 @@ package router
 import (
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain"
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/infrastructure/configs"
-	repository2 "github.com/HongJungWan/ffmpeg-video-modules/cmd/infrastructure/repository"
+	repository_impl "github.com/HongJungWan/ffmpeg-video-modules/cmd/infrastructure/repository"
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/interfaces/controller"
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/usecases"
 	"github.com/gin-contrib/cors"
@@ -38,9 +38,9 @@ func NewRouter(conf configs.Config, db *gorm.DB) *gin.Engine {
 	healthCheckController := controller.NewHealthCheckController(healthCheckInteractor)
 
 	// 비즈니스 로직 관련 설정
-	videoRepository := repository2.NewVideoRepository(db)
-	videoJobRepository := repository2.NewVideoJobRepository(db)
-	finalVideoRepository := repository2.NewFinalVideoRepository(db)
+	videoRepository := repository_impl.NewVideoRepository(db)
+	videoJobRepository := repository_impl.NewVideoJobRepository(db)
+	finalVideoRepository := repository_impl.NewFinalVideoRepository(db)
 
 	videoInteractor := usecases.NewVideoInteractor(videoRepository, videoJobRepository, finalVideoRepository)
 	videoJobInteractor := usecases.NewVideoJobInteractor(videoJobRepository, videoRepository, finalVideoRepository)
