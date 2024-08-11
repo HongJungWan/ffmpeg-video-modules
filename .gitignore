@@ -18,3 +18,5 @@
 logs
 uploads/*
 downloads/*
+*/usecases/uploads/*
+*/usecases/downloads/*
