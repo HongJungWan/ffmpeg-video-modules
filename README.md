@@ -2,13 +2,10 @@
 
 <br>
 
-### 핵심 문제 해결 전략 아티클 🧐
+### 핵심 문제 해결 전략 🧐
 
 * 아티클 1
 * 아티클 2
-
-
-* ETC. 과제 회고 아티클
 
 <br><br>
 
@@ -54,7 +51,7 @@ docker run -d --name mariadb -p 3310:3306 -v mysql_db:/var/lib/mysql --network m
 
 ```
 # 📌 GoLand IDE 기준
-Program arguments : -c cmd/deploy/dev/config.toml
+Program arguments : -c deploy/dev/config.toml
 
 
 # 📌Terminal 기준
@@ -66,15 +63,12 @@ Program arguments : -c cmd/deploy/dev/config.toml
 ### 테스트 코드 실행 시키기
 
 ```
-# 📌 Git Bash 기준 명령어
+# 📌 특정 디렉토리의 모든 테스트 코드 실행 [Git Bash 기준]
+go test ./cmd/...
 
 
-# 📌 특정 디렉토리의 모든 테스트 코드 실행
-go test ./app/...
-
-
-# 📌 커버리지 프로파일 생성 후, HTML 보고서 생성
-go test -v -coverprofile=coverage.out ./app/...
+# 📌 커버리지 프로파일 생성 후, HTML 보고서 생성 [Git Bash 기준]
+go test -v -coverprofile=coverage.out ./cmd/...
 go tool cover -html=coverage.out
 ```
 
@@ -110,6 +104,12 @@ ffmpeg -f lavfi -i color=c=purple:s=320x240:d=6 -vf "drawtext=fontfile='C\\Windo
 <img src="docs/server-architecture.png" alt="Application Server Architecture" width="800"/>
 
 📌 [참고 Link](https://github.com/bxcodec/go-clean-arch)
+
+<br><br>
+
+### Go Clean Architecture 기반 폴더 구조
+
+<img src="docs/folder-structure.png" alt="Folder Structure" width="250"/>
 
 <br><br>
 
