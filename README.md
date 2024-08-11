@@ -2,10 +2,9 @@
 
 <br>
 
-### 핵심 문제 해결 전략 🧐
+### 핵심 문제 해결 전략 및 분석 🧐
 
-* 아티클 1
-* 아티클 2
+* 📌 [FFmpeg 라이브러리로 구현하는 동영상 처리 모듈: 문제 해결 전략 및 분석](https://day-t.tistory.com/11)
 
 <br><br>
 
@@ -35,7 +34,7 @@
 
 <br><br>
 
-### MariaDB 컨테이너 실행
+### MariaDB 컨테이너 실행 (Windows Powershell)
 
 ```
 docker network create --driver bridge mynetwork
@@ -50,27 +49,36 @@ docker run -d --name mariadb -p 3310:3306 -v mysql_db:/var/lib/mysql --network m
 ### 실행
 
 ```
-# 📌 GoLand IDE 기준
-Program arguments : -c deploy/dev/config.toml
+# 📌 GoLand IDE에서 프로그램 실행 시 설정하는 방법
+
+- Program arguments: Go 프로그램을 실행할 때 전달할 명령줄 인수. 
+- 여기서는 `-c deploy/dev/config.toml`을 전달하여 `config.toml` 파일을 설정 파일로 사용합니다.
+
+- 설정 방법
+  1. GoLand에서 Run/Debug Configurations를 엽니다.
+  2. Program arguments 필드에 `-c deploy/dev/config.toml`을 입력합니다.
+  3. 이 설정은 프로그램이 `config.toml` 파일을 읽어들이도록 하여, 지정된 환경 설정을 로드하게 합니다.
+  4. 설정을 저장하고, Run 버튼을 클릭하여 프로그램을 실행합니다.
+
 ```
 
 <br><br>
 
-### 테스트 코드 실행 시키기
+### 테스트 코드 실행 시키기 (Git Bash)
 
 ```
-# 📌 모든 테스트 코드 실행 [Git Bash 기준]
+# 📌 모든 테스트 코드 실행
 go test ./cmd/...
 
 
-# 📌 커버리지 프로파일 생성 후, HTML 보고서 생성 [Git Bash 기준]
+# 📌 커버리지 프로파일 생성 후, HTML 보고서 생성
 go test -v -coverprofile=coverage.out ./cmd/...
 go tool cover -html=coverage.out
 ```
 
 <br><br>
 
-### 헬스 체크 API 테스트
+### 헬스 체크 API 테스트 (Git Bash)
 
 ```git bash
 $ curl --http1.1 http://localhost:3031/api/health
@@ -78,7 +86,7 @@ $ curl --http1.1 http://localhost:3031/api/health
 
 <br><br>
 
-### 테스트 비디오 생성 ffmpeg 명령어
+### 테스트 비디오 생성 ffmpeg 명령어 (Windows Powershell)
 
 ```
 ffmpeg -f lavfi -i color=c=blue:s=320x240:d=5 -vf "drawtext=fontfile='C\\Windows\\Fonts\\arial.ttf': text='Test Video 1': fontcolor=white: fontsize=24: x=(w-text_w)/2: y=(h-text_h)/2" -c:v libx264 -t 5 -pix_fmt yuv420p "C:\test_video_1.mp4"
@@ -92,6 +100,12 @@ ffmpeg -f lavfi -i color=c=yellow:s=320x240:d=5 -vf "drawtext=fontfile='C\\Windo
 ffmpeg -f lavfi -i color=c=purple:s=320x240:d=6 -vf "drawtext=fontfile='C\\Windows\\Fonts\\arial.ttf': text='Test Video 5': fontcolor=white: fontsize=24: x=(w-text_w)/2: y=(h-text_h)/2" -c:v libx264 -t 6 -pix_fmt yuv420p "C:\test_video_5.mp4"
 ```
 * 위 명령어를 실행하면, 테스트 비디오 파일들은 `C 드라이브`의 루트에 생성됩니다.
+
+<br><br>
+
+### Swagger 테스트 (사용 예시)
+
+(... 작성 중 ...)
 
 <br><br>
 
@@ -112,6 +126,19 @@ ffmpeg -f lavfi -i color=c=purple:s=320x240:d=6 -vf "drawtext=fontfile='C\\Windo
 ### ERD(Entity Relationship Diagram)
 
 <img src="docs/erd.png" alt="ERD Diagram" width="600"/>
+
+<br><br>
+
+### API Endpoint
+
+| HTTP Method | URI                       | Description              |
+|-------------|---------------------------|--------------------------|
+| `POST`      | `/api/videos`               | 동영상 업로드                  |
+| `POST`      | `/api/videos/{id}/trim`     | `명령` 동영상 컷 편집 (Trim)     |
+| `POST`      | `/api/videos/concat`        | `명령` 동영상 이어 붙이기 (Concat) |
+| `POST`      | `/api/jobs/execute`         | `명령` 작업 수행                 |
+| `GET`       | `/api/videos/{id}/download` | 최종 동영상 다운로드              |
+| `GET`       | `/api/videos`               | 동영상 및 작업 조회              |
 
 <br><br>
 
