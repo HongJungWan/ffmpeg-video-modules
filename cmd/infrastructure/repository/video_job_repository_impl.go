@@ -1,4 +1,4 @@
-package repository
+package repository_impl
 
 import (
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain"

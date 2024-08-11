@@ -52,10 +52,6 @@ docker run -d --name mariadb -p 3310:3306 -v mysql_db:/var/lib/mysql --network m
 ```
 # 📌 GoLand IDE 기준
 Program arguments : -c deploy/dev/config.toml
-
-
-# 📌Terminal 기준
-
 ```
 
 <br><br>
@@ -63,7 +59,7 @@ Program arguments : -c deploy/dev/config.toml
 ### 테스트 코드 실행 시키기
 
 ```
-# 📌 특정 디렉토리의 모든 테스트 코드 실행 [Git Bash 기준]
+# 📌 모든 테스트 코드 실행 [Git Bash 기준]
 go test ./cmd/...
 
 
