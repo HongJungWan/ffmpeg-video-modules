@@ -8,6 +8,13 @@ definitions:
     required:
     - videoIds
     type: object
+  request.ExecuteJobsRequest:
+    properties:
+      jobIds:
+        items:
+          type: integer
+        type: array
+    type: object
   request.TrimVideoRequest:
     properties:
       trimEnd:
@@ -27,6 +34,11 @@ definitions:
       filename:
         type: string
       id:
+        type: integer
+    type: object
+  response.JobIDResponse:
+    properties:
+      jobID:
         type: integer
     type: object
   response.VideoDetailResponse:
@@ -124,22 +136,37 @@ paths:
       - health
   /jobs/execute:
     post:
-      description: Executes all pending video jobs, such as trimming or concatenation
+      consumes:
+      - application/json
+      description: Executes the specified video jobs, such as trimming or concatenation,
+        based on job IDs
+      parameters:
+      - description: List of job IDs to execute
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.ExecuteJobsRequest'
       produces:
       - application/json
       responses:
         "201":
-          description: Status of job execution
+          description: List of executed job IDs
           schema:
-            additionalProperties:
-              type: string
+            items:
+              $ref: '#/definitions/response.JobIDResponse'
+            type: array
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties: true
             type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties: true
             type: object
-      summary: Executes pending video jobs
+      summary: Executes specified video jobs
       tags:
       - job execute
   /videos:
@@ -248,9 +275,7 @@ paths:
         "202":
           description: Job ID of the trimming task
           schema:
-            additionalProperties:
-              type: integer
-            type: object
+            $ref: '#/definitions/response.JobIDResponse'
         "400":
           description: Invalid video ID or bad request
           schema:
@@ -280,11 +305,9 @@ paths:
       - application/json
       responses:
         "202":
-          description: Job ID of the concatenation task
+          description: Job ID of the concantnation task
           schema:
-            additionalProperties:
-              type: integer
-            type: object
+            $ref: '#/definitions/response.JobIDResponse'
         "400":
           description: Bad request
           schema:
