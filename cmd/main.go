@@ -24,13 +24,18 @@ func main() {
 }
 
 func initializeSwaggerHost(conf *configs.Config) {
-	var host string
-	var scheme []string
+	docs.SwaggerInfo.Host = conf.Host
+	docs.SwaggerInfo.Schemes = conf.Scheme
+	docs.SwaggerInfo.Version = conf.Version
+	docs.SwaggerInfo.BasePath = conf.BasePath
+	docs.SwaggerInfo.Title = conf.Title
 
-	host = conf.Host
-	scheme = conf.Scheme
-
-	docs.SwaggerInfo.Host = host
-	docs.SwaggerInfo.Schemes = scheme
-	fmt.Printf("설정된 Swagger Host: %s, Schemes: %v \n", host, scheme)
+	fmt.Printf(
+		"설정된 Swagger 정보:\nHost: %s\nSchemes: %v\nVersion: %s\nBasePath: %s\nTitle: %s\n",
+		conf.Host,
+		conf.Scheme,
+		conf.Version,
+		conf.BasePath,
+		conf.Title,
+	)
 }

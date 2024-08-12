@@ -12,3 +12,6 @@ environment = "dev"
 
 host = "localhost:3031"
 scheme = "http"
+version = "1.0"
+basePath = "/api"
+title = "ffmpeg-video-modules API"
