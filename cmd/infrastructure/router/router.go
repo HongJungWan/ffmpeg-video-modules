@@ -8,6 +8,8 @@ import (
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/usecases"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 	"net/http"
 )
@@ -52,15 +54,17 @@ func NewRouter(conf configs.Config, db *gorm.DB) *gin.Engine {
 
 	router := service.Group("/api")
 
+	// API 라우트 설정
 	router.GET("/health", healthCheckController.HealthCheck)
-
 	router.POST("/videos", videoController.UploadVideo)
 	router.POST("/videos/:id/trim", videoJobController.TrimVideo)
 	router.POST("/videos/concat", videoJobController.ConcatVideos)
 	router.GET("/videos/:fid/download", finalVideoController.DownloadFinalVideo)
 	router.GET("/videos", videoController.GetVideoDetails)
-
 	router.POST("/jobs/execute", videoJobController.ExecuteJobs)
+
+	// Swagger UI 라우트 추가
+	service.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return service
 }

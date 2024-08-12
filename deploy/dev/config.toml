@@ -10,8 +10,5 @@ mariadb_port = "3310"
 # 환경 설정
 environment = "dev"
 
-# AWS S3 설정
-aws_access_key_id = "dummy"
-aws_secret_access_key = "dummy"
-aws_region = "dummy"
-s3_bucket_name = "dummy"
+host = "localhost:3031"
+scheme = "http"
