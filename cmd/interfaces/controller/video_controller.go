@@ -43,10 +43,14 @@ func (vdc *VideoController) GetVideoDetails(ctx *gin.Context) {
 // @Failure      500 {object} map[string]interface{} "Internal Server Error"
 // @Router       /videos [post]
 func (vc *VideoController) UploadVideo(ctx *gin.Context) {
-	err := vc.videoInteractor.HandleVideoUpload(ctx)
+	videoResponses, err := vc.videoInteractor.HandleVideoUpload(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusCreated, gin.H{"status": "success"})
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"videos": videoResponses,
+		"status": "success",
+	})
 }

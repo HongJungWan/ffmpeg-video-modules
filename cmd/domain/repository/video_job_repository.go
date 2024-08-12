@@ -8,4 +8,5 @@ type VideoJobRepository interface {
 	FindPendingJobs() ([]*domain.VideoJob, error)
 	UpdateStatus(job *domain.VideoJob) error
 	FindByVideoIDAndType(videoID int, jobType domain.VideoJobType) ([]*domain.VideoJob, error)
+	FindJobsByIDs(ids []int) ([]*domain.VideoJob, error)
 }

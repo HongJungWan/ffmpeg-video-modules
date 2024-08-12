@@ -39,3 +39,9 @@ func (repo *VideoJobRepositoryImpl) FindByVideoIDAndType(videoID int, jobType do
 	err := repo.DB.Where("video_id = ? AND job_type = ?", videoID, jobType).Find(&jobs).Error
 	return jobs, err
 }
+
+func (repo *VideoJobRepositoryImpl) FindJobsByIDs(ids []int) ([]*domain.VideoJob, error) {
+	var jobs []*domain.VideoJob
+	err := repo.DB.Where("id IN ?", ids).Find(&jobs).Error
+	return jobs, err
+}

@@ -71,3 +71,8 @@ func (m *MockVideoJobRepository) FindPendingJobs() ([]*domain.VideoJob, error) {
 	args := m.Called()
 	return args.Get(0).([]*domain.VideoJob), args.Error(1)
 }
+
+func (m *MockVideoJobRepository) FindJobsByIDs(jobIDs []int) ([]*domain.VideoJob, error) {
+	args := m.Called(jobIDs)
+	return args.Get(0).([]*domain.VideoJob), args.Error(1)
+}

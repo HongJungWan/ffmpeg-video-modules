@@ -1,15 +1,15 @@
 package controller_test
 
 import (
-	"bytes"
-	"encoding/json"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/interfaces/dto/response"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/usecases"
+	"github.com/HongJungWan/ffmpeg-video-modules/test/mocks"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"testing"
 
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/interfaces/controller"
-	"github.com/HongJungWan/ffmpeg-video-modules/cmd/interfaces/dto/request"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -29,65 +29,68 @@ func (m *MockVideoJobInteractor) ConcatVideos(videoIDs []int) (int, error) {
 	return args.Int(0), args.Error(1)
 }
 
-func (m *MockVideoJobInteractor) ExecuteJobs() error {
-	args := m.Called()
-	return args.Error(0)
+func (m *MockVideoJobInteractor) ExecuteJobs(jobIDs []int) ([]response.JobIDResponse, error) {
+	args := m.Called(jobIDs)
+	return args.Get(0).([]response.JobIDResponse), args.Error(1)
 }
 
 func TestTrimVideo(t *testing.T) {
 	// Given
 	videoID := 1
-	reqBody := request.TrimVideoRequest{
-		TrimStart: "00:00:05",
-		TrimEnd:   "00:00:10",
-	}
-	jsonValue, _ := json.Marshal(reqBody)
+	mockVideoRepo := new(mocks.MockVideoRepository)
+	mockVideoRepo.On("FindByID", videoID).Return(&domain.Video{
+		ID:       videoID,
+		Filename: "example.mp4",
+	}, nil)
 
-	videoJobInteractor := new(MockVideoJobInteractor)
-	videoJobInteractor.On("TrimVideo", videoID, reqBody.TrimStart, reqBody.TrimEnd).Return(1, nil)
+	mockJobRepo := new(mocks.MockVideoJobRepository)
+	mockJobRepo.On("Save", mock.Anything).Run(func(args mock.Arguments) {
+		job := args.Get(0).(*domain.VideoJob)
+		job.ID = 1 // 임의의 ID 설정
+	}).Return(nil)
 
-	r := gin.Default()
-	vjc := controller.NewVideoJobController(videoJobInteractor)
-	r.POST("/video/:id/trim", vjc.TrimVideo)
-
-	req, _ := http.NewRequest(http.MethodPost, "/video/"+strconv.Itoa(videoID)+"/trim", bytes.NewBuffer(jsonValue))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
+	interactor := usecases.NewVideoJobInteractor(mockJobRepo, mockVideoRepo, nil)
 
 	// When
-	r.ServeHTTP(w, req)
+	jobID, err := interactor.TrimVideo(videoID, "00:00:05", "00:00:10")
 
 	// Then
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Contains(t, w.Body.String(), "jobID")
-	videoJobInteractor.AssertCalled(t, "TrimVideo", videoID, reqBody.TrimStart, reqBody.TrimEnd)
+	assert.NoError(t, err)
+	assert.NotZero(t, jobID)
+	mockVideoRepo.AssertCalled(t, "FindByID", videoID)
+	mockJobRepo.AssertCalled(t, "Save", mock.Anything)
 }
 
 func TestConcatVideos(t *testing.T) {
 	// Given
-	reqBody := request.ConcatVideosRequest{
-		VideoIDs: []int{1, 2},
-	}
-	jsonValue, _ := json.Marshal(reqBody)
+	videoIDs := []int{1, 2}
+	mockVideoRepo := new(mocks.MockVideoRepository)
+	mockVideoRepo.On("FindByID", 1).Return(&domain.Video{
+		ID:       1,
+		Filename: "example1.mp4",
+	}, nil)
+	mockVideoRepo.On("FindByID", 2).Return(&domain.Video{
+		ID:       2,
+		Filename: "example2.mp4",
+	}, nil)
 
-	videoJobInteractor := new(MockVideoJobInteractor)
-	videoJobInteractor.On("ConcatVideos", reqBody.VideoIDs).Return(1, nil)
+	mockJobRepo := new(mocks.MockVideoJobRepository)
+	mockJobRepo.On("Save", mock.Anything).Run(func(args mock.Arguments) {
+		job := args.Get(0).(*domain.VideoJob)
+		job.ID = 1 // 임의의 ID 설정
+	}).Return(nil)
 
-	r := gin.Default()
-	vjc := controller.NewVideoJobController(videoJobInteractor)
-	r.POST("/video/concat", vjc.ConcatVideos)
-
-	req, _ := http.NewRequest(http.MethodPost, "/video/concat", bytes.NewBuffer(jsonValue))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
+	interactor := usecases.NewVideoJobInteractor(mockJobRepo, mockVideoRepo, nil)
 
 	// When
-	r.ServeHTTP(w, req)
+	jobID, err := interactor.ConcatVideos(videoIDs)
 
 	// Then
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Contains(t, w.Body.String(), "jobID")
-	videoJobInteractor.AssertCalled(t, "ConcatVideos", reqBody.VideoIDs)
+	assert.NoError(t, err)
+	assert.NotZero(t, jobID)
+	mockVideoRepo.AssertCalled(t, "FindByID", 1)
+	mockVideoRepo.AssertCalled(t, "FindByID", 2)
+	mockJobRepo.AssertCalled(t, "Save", mock.Anything)
 }
 
 func TestExecuteJobs(t *testing.T) {
@@ -106,7 +109,7 @@ func TestExecuteJobs(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	// Then
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusCreated, w.Code)
 	assert.Contains(t, w.Body.String(), "All jobs executed successfully")
 	videoJobInteractor.AssertCalled(t, "ExecuteJobs")
 }

@@ -25,10 +25,11 @@ func TestTrimVideo(t *testing.T) {
 	interactor := usecases.NewVideoJobInteractor(mockJobRepo, mockVideoRepo, nil)
 
 	// When
-	_, err := interactor.TrimVideo(videoID, "00:00:05", "00:00:10")
+	jobID, err := interactor.TrimVideo(videoID, "00:00:05", "00:00:10")
 
 	// Then
 	assert.NoError(t, err)
+	assert.NotZero(t, jobID)
 	mockVideoRepo.AssertCalled(t, "FindByID", videoID)
 	mockJobRepo.AssertCalled(t, "Save", mock.Anything)
 }
@@ -52,10 +53,11 @@ func TestConcatVideos(t *testing.T) {
 	interactor := usecases.NewVideoJobInteractor(mockJobRepo, mockVideoRepo, nil)
 
 	// When
-	_, err := interactor.ConcatVideos(videoIDs)
+	jobID, err := interactor.ConcatVideos(videoIDs)
 
 	// Then
 	assert.NoError(t, err)
+	assert.NotZero(t, jobID)
 	mockVideoRepo.AssertCalled(t, "FindByID", 1)
 	mockVideoRepo.AssertCalled(t, "FindByID", 2)
 	mockJobRepo.AssertCalled(t, "Save", mock.Anything)

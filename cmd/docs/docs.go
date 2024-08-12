@@ -40,22 +40,43 @@ const docTemplate = `{
         },
         "/jobs/execute": {
             "post": {
-                "description": "Executes all pending video jobs, such as trimming or concatenation",
+                "description": "Executes the specified video jobs, such as trimming or concatenation, based on job IDs",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "job execute"
                 ],
-                "summary": "Executes pending video jobs",
+                "summary": "Executes specified video jobs",
+                "parameters": [
+                    {
+                        "description": "List of job IDs to execute",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.ExecuteJobsRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
-                        "description": "Status of job execution",
+                        "description": "List of executed job IDs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.JobIDResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "additionalProperties": true
                         }
                     },
                     "500": {
@@ -167,12 +188,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "202": {
-                        "description": "Job ID of the concatenation task",
+                        "description": "Job ID of the concantnation task",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "integer"
-                            }
+                            "$ref": "#/definitions/response.JobIDResponse"
                         }
                     },
                     "400": {
@@ -273,10 +291,7 @@ const docTemplate = `{
                     "202": {
                         "description": "Job ID of the trimming task",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "integer"
-                            }
+                            "$ref": "#/definitions/response.JobIDResponse"
                         }
                     },
                     "400": {
@@ -312,6 +327,17 @@ const docTemplate = `{
                 }
             }
         },
+        "request.ExecuteJobsRequest": {
+            "type": "object",
+            "properties": {
+                "jobIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
         "request.TrimVideoRequest": {
             "type": "object",
             "required": [
@@ -340,6 +366,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.JobIDResponse": {
+            "type": "object",
+            "properties": {
+                "jobID": {
                     "type": "integer"
                 }
             }
