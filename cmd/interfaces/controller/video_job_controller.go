@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/interfaces/dto/request"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/interfaces/dto/response"
 	"net/http"
 	"strconv"
 
@@ -25,7 +26,7 @@ func NewVideoJobController(videoJobInteractor usecases.VideoJobInteractor) *Vide
 // @Produce      json
 // @Param        id   path      int                     true  "Video ID"
 // @Param        body body      request.TrimVideoRequest true  "Trim start and end times"
-// @Success      202 {object} map[string]int            "Job ID of the trimming task"
+// @Success      202 {object} response.JobIDResponse     "Job ID of the trimming task"
 // @Failure      400 {object} map[string]interface{}    "Invalid video ID or bad request"
 // @Failure      500 {object} map[string]interface{}    "Internal Server Error"
 // @Router       /videos/{id}/trim [post]
@@ -48,7 +49,7 @@ func (vjc *VideoJobController) TrimVideo(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusAccepted, gin.H{"jobID": jobID})
+	ctx.JSON(http.StatusAccepted, response.JobIDResponse{JobID: jobID})
 }
 
 // ConcatVideos godoc
@@ -58,7 +59,7 @@ func (vjc *VideoJobController) TrimVideo(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        body body      request.ConcatVideosRequest true  "List of video IDs to concatenate"
-// @Success      202 {object} map[string]int               "Job ID of the concatenation task"
+// @Success      202 {object} response.JobIDResponse     "Job ID of the concantnation task"
 // @Failure      400 {object} map[string]interface{}       "Bad request"
 // @Failure      500 {object} map[string]interface{}       "Internal Server Error"
 // @Router       /videos/concat [post]
@@ -75,23 +76,32 @@ func (vjc *VideoJobController) ConcatVideos(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusAccepted, gin.H{"jobID": jobID})
+	ctx.JSON(http.StatusAccepted, response.JobIDResponse{JobID: jobID})
 }
 
 // ExecuteJobs godoc
-// @Summary      Executes pending video jobs
-// @Description  Executes all pending video jobs, such as trimming or concatenation
+// @Summary      Executes specified video jobs
+// @Description  Executes the specified video jobs, such as trimming or concatenation, based on job IDs
 // @Tags         job execute
+// @Accept       json
 // @Produce      json
-// @Success      201 {object} map[string]string          "Status of job execution"
-// @Failure      500 {object} map[string]interface{}     "Internal Server Error"
+// @Param        body body      request.ExecuteJobsRequest true  "List of job IDs to execute"
+// @Success      201 {array} response.JobIDResponse        "List of executed job IDs"
+// @Failure      400 {object} map[string]interface{}       "Invalid request body"
+// @Failure      500 {object} map[string]interface{}       "Internal Server Error"
 // @Router       /jobs/execute [post]
 func (vjc *VideoJobController) ExecuteJobs(ctx *gin.Context) {
-	err := vjc.videoJobInteractor.ExecuteJobs()
+	var req request.ExecuteJobsRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	jobIDs, err := vjc.videoJobInteractor.ExecuteJobs(req.JobIDs)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"status": "All jobs executed successfully"})
+	ctx.JSON(http.StatusCreated, jobIDs)
 }

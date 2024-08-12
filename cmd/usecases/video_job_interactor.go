@@ -6,6 +6,7 @@ import (
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain"
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain/repository"
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/infrastructure/ffmpeg"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/interfaces/dto/response"
 	"os"
 	"path/filepath"
 )
@@ -13,12 +14,12 @@ import (
 type VideoJobInteractor interface {
 	TrimVideo(videoID int, trimStart string, trimEnd string) (int, error)
 	ConcatVideos(videoIDs []int) (int, error)
-	ExecuteJobs() error
+	ExecuteJobs(jobIDs []int) ([]response.JobIDResponse, error)
 }
 
 const (
 	UPLOADS_DIR   = "uploads"
-	DOWNLOADS_DIR = "downloads" // 변경된 결과물 저장 디렉토리
+	DOWNLOADS_DIR = "downloads"
 )
 
 type VideoJobInteractorImpl struct {
@@ -41,7 +42,6 @@ func (vji *VideoJobInteractorImpl) TrimVideo(videoID int, trimStart string, trim
 		return 0, fmt.Errorf("비디오를 찾을 수 없습니다: %w", err)
 	}
 
-	// downloads 폴더 경로 생성
 	if err := os.MkdirAll(DOWNLOADS_DIR, os.ModePerm); err != nil {
 		return 0, fmt.Errorf("다운로드 디렉토리를 생성할 수 없습니다: %w", err)
 	}
@@ -67,7 +67,6 @@ func (vji *VideoJobInteractorImpl) ConcatVideos(videoIDs []int) (int, error) {
 		return 0, fmt.Errorf("비디오 ID 목록이 비어 있습니다")
 	}
 
-	// downloads 폴더 경로 생성
 	if err := os.MkdirAll(DOWNLOADS_DIR, os.ModePerm); err != nil {
 		return 0, fmt.Errorf("다운로드 디렉토리를 생성할 수 없습니다: %w", err)
 	}
@@ -95,21 +94,24 @@ func (vji *VideoJobInteractorImpl) ConcatVideos(videoIDs []int) (int, error) {
 	return job.ID, nil
 }
 
-func (vji *VideoJobInteractorImpl) ExecuteJobs() error {
-	pendingJobs, err := vji.videoJobRepo.FindPendingJobs()
+func (vji *VideoJobInteractorImpl) ExecuteJobs(jobIDs []int) ([]response.JobIDResponse, error) {
+	pendingJobs, err := vji.videoJobRepo.FindJobsByIDs(jobIDs)
 	if err != nil {
-		return fmt.Errorf("작업을 불러올 수 없습니다: %w", err)
+		return nil, fmt.Errorf("작업을 불러올 수 없습니다: %w", err)
 	}
+
+	var successfulJobs []response.JobIDResponse
+	var executionError error
 
 	for _, job := range pendingJobs {
 		job.UpdateStatus(domain.InProgress)
 		if err := vji.videoJobRepo.UpdateStatus(job); err != nil {
-			return fmt.Errorf("작업 상태를 업데이트할 수 없습니다: %w", err)
+			return nil, fmt.Errorf("작업 상태를 업데이트할 수 없습니다: %w", err)
 		}
 
 		var parameters map[string]interface{}
 		if err := json.Unmarshal([]byte(job.Parameters), &parameters); err != nil {
-			return fmt.Errorf("작업 파라미터를 파싱할 수 없습니다: %w", err)
+			return nil, fmt.Errorf("작업 파라미터를 파싱할 수 없습니다: %w", err)
 		}
 
 		var execErr error
@@ -144,30 +146,33 @@ func (vji *VideoJobInteractorImpl) ExecuteJobs() error {
 		if execErr != nil {
 			job.UpdateStatus(domain.JobFailed)
 			vji.videoJobRepo.UpdateStatus(job)
-			// video 테이블의 상태를 failed로 업데이트
 			originalVideo, _ := vji.videoRepo.FindByID(job.VideoID)
 			originalVideo.UpdateStatus(domain.Failed)
 			vji.videoRepo.Save(originalVideo)
-			return execErr
+			executionError = execErr
+			continue
 		} else {
 			job.UpdateStatus(domain.Completed)
+			successfulJobs = append(successfulJobs, response.JobIDResponse{JobID: job.ID})
 		}
 
-		// 작업이 완료되면 최종 비디오 정보 저장
 		originalVideo, _ := vji.videoRepo.FindByID(job.VideoID)
 		finalVideo := domain.NewFinalVideo(originalVideo.ID, filepath.Base(finalFilename), finalFilename, finalDuration)
 		if err := vji.finalVideoRepo.SaveFinalVideo(finalVideo); err != nil {
-			return fmt.Errorf("최종 비디오 정보를 저장할 수 없습니다: %w", err)
+			return nil, fmt.Errorf("최종 비디오 정보를 저장할 수 없습니다: %w", err)
 		}
 
-		// video 테이블의 상태를 finished로 업데이트
 		originalVideo.UpdateStatus(domain.FINISHED)
 		vji.videoRepo.Save(originalVideo)
 
 		if err := vji.videoJobRepo.UpdateStatus(job); err != nil {
-			return fmt.Errorf("작업 상태를 업데이트할 수 없습니다: %w", err)
+			return nil, fmt.Errorf("작업 상태를 업데이트할 수 없습니다: %w", err)
 		}
 	}
 
-	return nil
+	if executionError != nil {
+		return successfulJobs, fmt.Errorf("일부 작업이 실패했습니다: %w", executionError)
+	}
+
+	return successfulJobs, nil
 }

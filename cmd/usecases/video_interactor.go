@@ -8,14 +8,13 @@ import (
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/interfaces/dto/response"
 	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"time"
 )
 
 type VideoInteractor interface {
-	HandleVideoUpload(ctx *gin.Context) error
+	HandleVideoUpload(ctx *gin.Context) ([]response.VideoResponse, error)
 	GetVideoDetails() ([]response.VideoDetailResponse, error)
 }
 
@@ -90,10 +89,10 @@ func (vdi *VideoInteractorImpl) GetVideoDetails() ([]response.VideoDetailRespons
 	return videoDetails, nil
 }
 
-func (vi *VideoInteractorImpl) HandleVideoUpload(ctx *gin.Context) error {
+func (vi *VideoInteractorImpl) HandleVideoUpload(ctx *gin.Context) ([]response.VideoResponse, error) {
 	form, err := ctx.MultipartForm()
 	if err != nil {
-		return fmt.Errorf("잘못된 폼 데이터: %v", err)
+		return nil, fmt.Errorf("잘못된 폼 데이터: %v", err)
 	}
 	files := form.File["files"]
 
@@ -107,30 +106,29 @@ func (vi *VideoInteractorImpl) HandleVideoUpload(ctx *gin.Context) error {
 
 		// 업로드된 파일을 저장
 		if err := os.MkdirAll(filepath.Dir(dst), os.ModePerm); err != nil {
-			return fmt.Errorf("디렉토리를 생성할 수 없음: %v", err)
+			return nil, fmt.Errorf("디렉토리를 생성할 수 없음: %v", err)
 		}
 		if err := ctx.SaveUploadedFile(file, dst); err != nil {
-			return fmt.Errorf("파일을 저장할 수 없음: %v", err)
+			return nil, fmt.Errorf("파일을 저장할 수 없음: %v", err)
 		}
 
 		// 동영상 길이 계산
 		log.Printf("Calculating duration for: %s", dst)
 		duration, err := ffmpeg.GetVideoDuration(dst)
 		if err != nil {
-			return fmt.Errorf("동영상 길이를 계산할 수 없음: %v", err)
+			return nil, fmt.Errorf("동영상 길이를 계산할 수 없음: %v", err)
 		}
 
 		// 새로운 비디오 엔트리 생성
 		videoResponse, err := vi.processVideo(uniqueFilename, dst, duration)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		videoResponses = append(videoResponses, *videoResponse)
 	}
 
-	// 업로드된 모든 비디오에 대한 응답 반환
-	ctx.JSON(http.StatusOK, videoResponses)
-	return nil
+	// 모든 비디오 응답을 반환
+	return videoResponses, nil
 }
 
 func (vi *VideoInteractorImpl) processVideo(filename string, filePath string, duration int) (*response.VideoResponse, error) {
