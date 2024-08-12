@@ -21,9 +21,9 @@ func (m *MockVideoInteractor) GetVideoDetails() ([]response.VideoDetailResponse,
 	return args.Get(0).([]response.VideoDetailResponse), args.Error(1)
 }
 
-func (m *MockVideoInteractor) HandleVideoUpload(ctx *gin.Context) error {
+func (m *MockVideoInteractor) HandleVideoUpload(ctx *gin.Context) ([]response.VideoResponse, error) {
 	args := m.Called(ctx)
-	return args.Error(0)
+	return args.Get(0).([]response.VideoResponse), args.Error(1)
 }
 
 func TestGetVideoDetails(t *testing.T) {
@@ -61,8 +61,18 @@ func TestGetVideoDetails(t *testing.T) {
 
 func TestUploadVideo(t *testing.T) {
 	// Given
+	expectedResponse := []response.VideoResponse{
+		{
+			ID:       1,
+			Filename: "uploaded_video.mp4",
+			FilePath: "/uploads/uploaded_video.mp4",
+			Duration: 100,
+			Status:   "uploaded",
+		},
+	}
+
 	videoInteractor := new(MockVideoInteractor)
-	videoInteractor.On("HandleVideoUpload", mock.Anything).Return(nil)
+	videoInteractor.On("HandleVideoUpload", mock.Anything).Return(expectedResponse, nil)
 
 	r := gin.Default()
 	vc := controller.NewVideoController(videoInteractor)
@@ -75,7 +85,7 @@ func TestUploadVideo(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	// Then
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusCreated, w.Code)
 	assert.Contains(t, w.Body.String(), "success")
 	videoInteractor.AssertCalled(t, "HandleVideoUpload", mock.Anything)
 }
