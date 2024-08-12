@@ -114,51 +114,69 @@ ffmpeg-video-modules API Server 실행 후, `http://localhost:3031/docs/index.ht
 
 <br>
 
-#### 헬스 체크 API
+### 헬스 체크 API
+
+| 실행 전 UI                                               | 실행 후 UI                                               |
+|-------------------------------------------------------|-------------------------------------------------------|
+| <img src="docs/image/health-check-1.png" width="550"> | <img src="docs/image/health-check-2.png" width="550"> |
+
+<br><br>
+
+### 동영상 업로드 API
 
 | 실행 전 UI  | 실행 후 UI          |
 |-------|---------------|
-|  |  |
+| <img src="docs/image/video-upload-1.png" width="550"> | <img src="docs/image/video-upload-2.png" width="550"> |
 
-<br>
+* Swagger UI에서는 기본적으로 여러 개의 파일을 한 번에 업로드할 수 있는 기능을 직접 제공하지 않습니다.
 
-#### 동영상 업로드 API
 
-| 실행 전 UI  | 실행 후 UI          |
-|-------|---------------|
-|  |  |
+* 여러 개의 파일을 한 번에 업로드하는 기능은 아래의 이미지를 참고하여 Postman으로 수행하길 바랍니다.
 
-<br>
+<img src="docs/image/video-upload-postman.png" width="850">
 
-#### 동영상 컷 편집 (Trim) API
+<br><br>
 
-| 실행 전 UI  | 실행 후 UI          |
-|-------|---------------|
-|  |  |
-
-<br>
-
-#### 동영상 이어 붙이기 (Concat) API
+### 동영상 컷 편집 (Trim) API
 
 | 실행 전 UI  | 실행 후 UI          |
 |-------|---------------|
-|  |  |
+| <img src="docs/image/video-trim-1.png" width="550"> | <img src="docs/image/video-trim-2.png" width="550"> |
 
-<br>
+* 📌 언급된 요구사항은 사용자가 이전에 요청한 모든 트림 및 이어붙이기 작업을 한 번에 수행할 수 있도록 하는 것이다.
 
-#### 작업 수행 API
 
-| 실행 전 UI  | 실행 후 UI          |
-|-------|---------------|
-|  |  |
+* 📌 제공된 요구사항 범위 내에서는 트림과 이어 붙이기 작업이 순차적으로(한 번에) 처리되는 방식으로 구현하면 충분할 것으로 판단.
 
-<br>
+<br><br>
 
-#### 최종 동영상 다운로드 API
+### 동영상 이어 붙이기 (Concat) API
 
 | 실행 전 UI  | 실행 후 UI          |
 |-------|---------------|
-|  |  |
+| <img src="docs/image/video-concat-1.png" width="550">  | <img src="docs/image/video-concat-2.png" width="550"> |
+
+* 📌 언급된 요구사항은 사용자가 이전에 요청한 모든 트림 및 이어붙이기 작업을 한 번에 수행할 수 있도록 하는 것이다.
+
+
+* 📌 제공된 요구사항 범위 내에서는 트림과 이어 붙이기 작업이 순차적으로(한 번에) 처리되는 방식으로 구현하면 충분할 것으로 판단.
+
+
+<br><br>
+
+### 작업 수행 API
+
+| 실행 전 UI  | 실행 후 UI                                              |
+|-------|------------------------------------------------------|
+| <img src="docs/image/job-execute-1.png" width="550"> | <img src="docs/image/job-execute-2.png" width="550"> |
+
+<br><br>
+
+### 최종 동영상 다운로드 API
+
+| 실행 전 UI                                                        | 실행 후 UI          |
+|----------------------------------------------------------------|---------------|
+| <img src="docs/image/final-video-download-1.png" width="550"/> | <img src="docs/image/final-video-download-2.png" width="550"/> |
 
 <br><br>
 
