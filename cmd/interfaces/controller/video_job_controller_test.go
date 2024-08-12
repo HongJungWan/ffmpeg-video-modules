@@ -1,7 +1,10 @@
 package controller_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/domain"
+	"github.com/HongJungWan/ffmpeg-video-modules/cmd/interfaces/dto/request"
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/interfaces/dto/response"
 	"github.com/HongJungWan/ffmpeg-video-modules/cmd/usecases"
 	"github.com/HongJungWan/ffmpeg-video-modules/test/mocks"
@@ -96,13 +99,22 @@ func TestConcatVideos(t *testing.T) {
 func TestExecuteJobs(t *testing.T) {
 	// Given
 	videoJobInteractor := new(MockVideoJobInteractor)
-	videoJobInteractor.On("ExecuteJobs").Return(nil)
+	jobIDs := []int{1, 2} // 테스트를 위한 임의의 job IDs
+	videoJobInteractor.On("ExecuteJobs", jobIDs).Return([]response.JobIDResponse{
+		{JobID: 1},
+		{JobID: 2},
+	}, nil)
 
 	r := gin.Default()
 	vjc := controller.NewVideoJobController(videoJobInteractor)
 	r.POST("/video/jobs/execute", vjc.ExecuteJobs)
 
-	req, _ := http.NewRequest(http.MethodPost, "/video/jobs/execute", nil)
+	// 요청 본문에 포함할 job IDs JSON
+	reqBody := request.ExecuteJobsRequest{JobIDs: jobIDs}
+	jsonValue, _ := json.Marshal(reqBody)
+
+	req, _ := http.NewRequest(http.MethodPost, "/video/jobs/execute", bytes.NewBuffer(jsonValue))
+	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 
 	// When
@@ -110,6 +122,6 @@ func TestExecuteJobs(t *testing.T) {
 
 	// Then
 	assert.Equal(t, http.StatusCreated, w.Code)
-	assert.Contains(t, w.Body.String(), "All jobs executed successfully")
-	videoJobInteractor.AssertCalled(t, "ExecuteJobs")
+	assert.Contains(t, w.Body.String(), "jobID")
+	videoJobInteractor.AssertCalled(t, "ExecuteJobs", jobIDs)
 }

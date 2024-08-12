@@ -20,7 +20,11 @@ func TestTrimVideo(t *testing.T) {
 	}, nil)
 
 	mockJobRepo := new(mocks.MockVideoJobRepository)
-	mockJobRepo.On("Save", mock.Anything).Return(nil)
+	// Save 호출 시 job.ID를 1로 설정
+	mockJobRepo.On("Save", mock.Anything).Run(func(args mock.Arguments) {
+		job := args.Get(0).(*domain.VideoJob)
+		job.ID = 1 // 임의의 ID 설정
+	}).Return(nil)
 
 	interactor := usecases.NewVideoJobInteractor(mockJobRepo, mockVideoRepo, nil)
 
@@ -29,7 +33,7 @@ func TestTrimVideo(t *testing.T) {
 
 	// Then
 	assert.NoError(t, err)
-	assert.NotZero(t, jobID)
+	assert.NotZero(t, jobID) // jobID가 0이 아님을 확인
 	mockVideoRepo.AssertCalled(t, "FindByID", videoID)
 	mockJobRepo.AssertCalled(t, "Save", mock.Anything)
 }
@@ -48,7 +52,11 @@ func TestConcatVideos(t *testing.T) {
 	}, nil)
 
 	mockJobRepo := new(mocks.MockVideoJobRepository)
-	mockJobRepo.On("Save", mock.Anything).Return(nil)
+	// Save 호출 시 job.ID를 1로 설정
+	mockJobRepo.On("Save", mock.Anything).Run(func(args mock.Arguments) {
+		job := args.Get(0).(*domain.VideoJob)
+		job.ID = 1 // 임의의 ID 설정
+	}).Return(nil)
 
 	interactor := usecases.NewVideoJobInteractor(mockJobRepo, mockVideoRepo, nil)
 
@@ -57,7 +65,7 @@ func TestConcatVideos(t *testing.T) {
 
 	// Then
 	assert.NoError(t, err)
-	assert.NotZero(t, jobID)
+	assert.NotZero(t, jobID) // jobID가 0이 아님을 확인
 	mockVideoRepo.AssertCalled(t, "FindByID", 1)
 	mockVideoRepo.AssertCalled(t, "FindByID", 2)
 	mockJobRepo.AssertCalled(t, "Save", mock.Anything)
