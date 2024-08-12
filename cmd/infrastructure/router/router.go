@@ -56,11 +56,13 @@ func NewRouter(conf configs.Config, db *gorm.DB) *gin.Engine {
 
 	// API 라우트 설정
 	router.GET("/health", healthCheckController.HealthCheck)
+
 	router.POST("/videos", videoController.UploadVideo)
+	router.GET("/videos", videoController.GetVideoDetails)
 	router.POST("/videos/:id/trim", videoJobController.TrimVideo)
 	router.POST("/videos/concat", videoJobController.ConcatVideos)
 	router.GET("/videos/:fid/download", finalVideoController.DownloadFinalVideo)
-	router.GET("/videos", videoController.GetVideoDetails)
+
 	router.POST("/jobs/execute", videoJobController.ExecuteJobs)
 
 	// Swagger UI 라우트 추가
