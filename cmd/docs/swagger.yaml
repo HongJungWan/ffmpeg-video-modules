@@ -1,4 +1,301 @@
+definitions:
+  request.ConcatVideosRequest:
+    properties:
+      videoIds:
+        items:
+          type: integer
+        type: array
+    required:
+    - videoIds
+    type: object
+  request.TrimVideoRequest:
+    properties:
+      trimEnd:
+        type: string
+      trimStart:
+        type: string
+    required:
+    - trimEnd
+    - trimStart
+    type: object
+  response.FinalVideoDetail:
+    properties:
+      downloadLink:
+        type: string
+      filePath:
+        type: string
+      filename:
+        type: string
+      id:
+        type: integer
+    type: object
+  response.VideoDetailResponse:
+    properties:
+      concatJobs:
+        items:
+          $ref: '#/definitions/response.VideoJobDetail'
+        type: array
+      createdAt:
+        type: string
+      duration:
+        type: integer
+      filePath:
+        type: string
+      filename:
+        type: string
+      finalVideoDetail:
+        $ref: '#/definitions/response.FinalVideoDetail'
+      id:
+        type: integer
+      status:
+        type: string
+      trimJobs:
+        items:
+          $ref: '#/definitions/response.VideoJobDetail'
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  response.VideoDownloadResponse:
+    properties:
+      downloadLink:
+        type: string
+      filePath:
+        type: string
+      filename:
+        type: string
+      id:
+        type: integer
+    type: object
+  response.VideoJobDetail:
+    properties:
+      id:
+        type: integer
+      jobType:
+        type: string
+      parameters:
+        type: string
+      resultFilePath:
+        type: string
+      status:
+        type: string
+    type: object
+  response.VideoResponse:
+    properties:
+      createdAt:
+        type: string
+      duration:
+        type: integer
+      filePath:
+        type: string
+      filename:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  usecases.HealthStatus:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
 info:
   contact: {}
-paths: {}
+paths:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Endpoint to perform a health check and verify the service status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Health check result
+          schema:
+            $ref: '#/definitions/usecases.HealthStatus'
+      summary: Performs a health check
+      tags:
+      - health
+  /jobs/execute:
+    post:
+      description: Executes all pending video jobs, such as trimming or concatenation
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Status of job execution
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Executes pending video jobs
+      tags:
+      - job execute
+  /videos:
+    get:
+      consumes:
+      - application/json
+      description: Fetches a list of all video details including trimming, concatenation
+        jobs, and final video information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of video details
+          schema:
+            items:
+              $ref: '#/definitions/response.VideoDetailResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Retrieves details of all videos
+      tags:
+      - video
+    post:
+      consumes:
+      - multipart/form-data
+      description: Handles the upload of multiple video files, saves them, and returns
+        their details
+      parameters:
+      - description: Video files to upload
+        in: formData
+        name: files
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Uploaded video details
+          schema:
+            items:
+              $ref: '#/definitions/response.VideoResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Uploads video files
+      tags:
+      - video
+  /videos/{fid}/download:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the download link for the final video based on the video
+        ID
+      parameters:
+      - description: Final Video ID
+        in: path
+        name: fid
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Download link for the final video
+          schema:
+            $ref: '#/definitions/response.VideoDownloadResponse'
+        "400":
+          description: Invalid video ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Downloads the final video
+      tags:
+      - video
+  /videos/{id}/trim:
+    post:
+      consumes:
+      - application/json
+      description: Trims the specified video to the given start and end times
+      parameters:
+      - description: Video ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Trim start and end times
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.TrimVideoRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Job ID of the trimming task
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Invalid video ID or bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Trims a video
+      tags:
+      - video
+  /videos/concat:
+    post:
+      consumes:
+      - application/json
+      description: Concatenates the specified videos into a single video
+      parameters:
+      - description: List of video IDs to concatenate
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.ConcatVideosRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Job ID of the concatenation task
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Concatenates multiple videos
+      tags:
+      - video
 swagger: "2.0"

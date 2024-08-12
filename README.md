@@ -103,15 +103,68 @@ ffmpeg -f lavfi -i color=c=purple:s=320x240:d=6 -vf "drawtext=fontfile='C\\Windo
 
 <br><br>
 
-### Swagger 테스트 (사용 예시)
+### Swagger 테스트 (Windows)
 
-(... 작성 중 ...)
+```
+cd cmd
+swag init
+
+ffmpeg-video-modules API Server 실행 후, `http://localhost:3031/docs/index.html` 접근
+```
+
+<br>
+
+#### 헬스 체크 API
+
+| 실행 전 UI  | 실행 후 UI          |
+|-------|---------------|
+|  |  |
+
+<br>
+
+#### 동영상 업로드 API
+
+| 실행 전 UI  | 실행 후 UI          |
+|-------|---------------|
+|  |  |
+
+<br>
+
+#### 동영상 컷 편집 (Trim) API
+
+| 실행 전 UI  | 실행 후 UI          |
+|-------|---------------|
+|  |  |
+
+<br>
+
+#### 동영상 이어 붙이기 (Concat) API
+
+| 실행 전 UI  | 실행 후 UI          |
+|-------|---------------|
+|  |  |
+
+<br>
+
+#### 작업 수행 API
+
+| 실행 전 UI  | 실행 후 UI          |
+|-------|---------------|
+|  |  |
+
+<br>
+
+#### 최종 동영상 다운로드 API
+
+| 실행 전 UI  | 실행 후 UI          |
+|-------|---------------|
+|  |  |
 
 <br><br>
 
 ### Application Server Architecture
 
-<img src="docs/server-architecture.png" alt="Application Server Architecture" width="800"/>
+<img src="docs/image/server-architecture.png" alt="Application Server Architecture" width="800"/>
 
 📌 [참고 Link](https://github.com/bxcodec/go-clean-arch)
 
@@ -119,13 +172,13 @@ ffmpeg -f lavfi -i color=c=purple:s=320x240:d=6 -vf "drawtext=fontfile='C\\Windo
 
 ### Go Clean Architecture 기반 폴더 구조
 
-<img src="docs/folder-structure.png" alt="Folder Structure" width="250"/>
+<img src="docs/image/folder-structure.png" alt="Folder Structure" width="250"/>
 
 <br><br>
 
 ### ERD(Entity Relationship Diagram)
 
-<img src="docs/erd.png" alt="ERD Diagram" width="600"/>
+<img src="docs/image/erd.png" alt="ERD Diagram" width="600"/>
 
 <br><br>
 

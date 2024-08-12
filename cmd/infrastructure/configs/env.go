@@ -9,6 +9,9 @@ type Config struct {
 
 	Environment string `toml:"ENVIRONMENT"`
 
-	Host   string   `toml:"HOST"`
-	Scheme []string `toml:"SCHEME"`
+	Host     string   `toml:"HOST"`
+	Scheme   []string `toml:"SCHEME"`
+	Version  string   `toml:"VERSION"`
+	BasePath string   `toml:"BASEPATH"`
+	Title    string   `toml:"TITLE"`
 }
