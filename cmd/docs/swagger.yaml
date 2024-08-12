@@ -18,12 +18,11 @@ definitions:
   request.TrimVideoRequest:
     properties:
       trimEnd:
+        default: "00:00:03"
         type: string
       trimStart:
+        default: "00:00:01"
         type: string
-    required:
-    - trimEnd
-    - trimStart
     type: object
   response.FinalVideoDetail:
     properties:

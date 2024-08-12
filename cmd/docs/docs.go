@@ -340,16 +340,14 @@ const docTemplate = `{
         },
         "request.TrimVideoRequest": {
             "type": "object",
-            "required": [
-                "trimEnd",
-                "trimStart"
-            ],
             "properties": {
                 "trimEnd": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "00:00:03"
                 },
                 "trimStart": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "00:00:01"
                 }
             }
         },
