@@ -112,7 +112,13 @@ swag init
 ffmpeg-video-modules API Server 실행 후, `http://localhost:3031/docs/index.html` 접근
 ```
 
-<br>
+<br><br>
+
+### Swagger 테스트 순서 (📌 권장)
+
+* `[GET] /health` -> `[POST] /videos` -> `[POST] /videos/{id}/trim` -> `[POST] /videos/concat` -> `[POST] /jobs/execute` -> `[GET] /Videos` -> `[GET] /videos/{fid}/download`
+
+<br><br>
 
 ### 헬스 체크 API
 
