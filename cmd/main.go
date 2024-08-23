@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/HongJungWan/ffmpeg-video-modules/cmd/docs"
-	"github.com/HongJungWan/ffmpeg-video-modules/cmd/helper"
-	"github.com/HongJungWan/ffmpeg-video-modules/cmd/infrastructure/configs"
+	"github.com/HongJungWan/ffmpeg-video-modules/internal/docs"
+	"github.com/HongJungWan/ffmpeg-video-modules/internal/helper"
+	configs2 "github.com/HongJungWan/ffmpeg-video-modules/internal/infrastructure/configs"
 	"os"
 )
 
 var (
-	conf = configs.Config{}
+	conf = configs2.Config{}
 	file string
 )
 
@@ -19,11 +19,11 @@ func main() {
 		os.Exit(-1)
 	}
 	initializeSwaggerHost(&conf)
-	db := configs.ConnectionDB(&conf)
+	db := configs2.ConnectionDB(&conf)
 	startServer(db)
 }
 
-func initializeSwaggerHost(conf *configs.Config) {
+func initializeSwaggerHost(conf *configs2.Config) {
 	docs.SwaggerInfo.Host = conf.Host
 	docs.SwaggerInfo.Schemes = conf.Scheme
 	docs.SwaggerInfo.Version = conf.Version
