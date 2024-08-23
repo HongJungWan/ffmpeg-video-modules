@@ -13,7 +13,7 @@ import (
 func TestVideoRepository_Save(t *testing.T) {
 	// Given
 	db, mock := mocks.SetupMockDBForVideo(t)
-	repo := repository_impl.repository_impl.NewVideoRepository(db)
+	repo := repository_impl.NewVideoRepository(db)
 	video := &domain.Video{
 		Filename: "test_video.mp4",
 		FilePath: "/videos/test_video.mp4",

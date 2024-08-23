@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"testing"
 
-	"github.com/HongJungWan/ffmpeg-video-modules/cmd/usecases"
+	"github.com/HongJungWan/ffmpeg-video-modules/internal/usecases"
 	"github.com/stretchr/testify/assert"
 )
 

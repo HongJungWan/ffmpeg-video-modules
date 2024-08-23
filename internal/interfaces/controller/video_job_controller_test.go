@@ -3,11 +3,11 @@ package controller_test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/HongJungWan/ffmpeg-video-modules/cmd/usecases"
 	domain2 "github.com/HongJungWan/ffmpeg-video-modules/internal/domain"
 	"github.com/HongJungWan/ffmpeg-video-modules/internal/interfaces/controller"
 	"github.com/HongJungWan/ffmpeg-video-modules/internal/interfaces/dto/request"
 	"github.com/HongJungWan/ffmpeg-video-modules/internal/interfaces/dto/response"
+	"github.com/HongJungWan/ffmpeg-video-modules/internal/usecases"
 	"github.com/HongJungWan/ffmpeg-video-modules/test/mocks"
 	"net/http"
 	"net/http/httptest"
