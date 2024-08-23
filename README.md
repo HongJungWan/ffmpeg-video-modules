@@ -68,11 +68,11 @@ docker run -d --name mariadb -p 3310:3306 -v mysql_db:/var/lib/mysql --network m
 
 ```
 # 📌 모든 테스트 코드 실행
-go test ./cmd/...
+go test ./internal/...
 
 
 # 📌 커버리지 프로파일 생성 후, HTML 보고서 생성
-go test -v -coverprofile=coverage.out ./cmd/...
+go test -v -coverprofile=coverage.out ./internal/...
 go tool cover -html=coverage.out
 ```
 
@@ -106,7 +106,7 @@ ffmpeg -f lavfi -i color=c=purple:s=320x240:d=6 -vf "drawtext=fontfile='C\\Windo
 ### Swagger 테스트 (Windows)
 
 ```
-cd cmd
+cd internal
 swag init
 
 ffmpeg-video-modules API Server 실행 후, `http://localhost:3031/docs/index.html` 접근
